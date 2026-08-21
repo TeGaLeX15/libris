@@ -1,0 +1,25 @@
+<!-- Views/LibraryView.axaml -->
+<UserControl
+    x:Class="Libris.Views.LibraryView"
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <StackPanel
+        HorizontalAlignment="Center"
+        VerticalAlignment="Center"
+        Spacing="8">
+
+        <TextBlock
+            HorizontalAlignment="Center"
+            FontSize="36"
+            FontWeight="SemiBold"
+            Text="Library" />
+
+        <TextBlock
+            HorizontalAlignment="Center"
+            Opacity="0.6"
+            Text="Your books will appear here." />
+
+    </StackPanel>
+
+</UserControl>

@@ -1,0 +1,327 @@
+<!-- Views/SettingsView.axaml -->
+<UserControl
+    x:Class="Libris.Views.SettingsView"
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:suki="clr-namespace:SukiUI.Controls;assembly=SukiUI"
+    xmlns:vm="using:Libris.ViewModels"
+    x:DataType="vm:SettingsViewModel">
+
+    <ScrollViewer
+        HorizontalScrollBarVisibility="Disabled"
+        VerticalScrollBarVisibility="Auto">
+
+        <StackPanel
+            MaxWidth="900"
+            Margin="0"
+            Spacing="32">
+
+            <!-- Header -->
+
+            <StackPanel Spacing="6">
+
+                <TextBlock
+                    FontSize="32"
+                    FontWeight="SemiBold"
+                    Text="Settings" />
+
+                <TextBlock
+                    Opacity="0.6"
+                    Text="Customize your Libris experience." />
+
+            </StackPanel>
+
+
+            <!-- Appearance -->
+
+            <StackPanel Spacing="16">
+
+                <TextBlock
+                    FontSize="20"
+                    FontWeight="SemiBold"
+                    Text="Appearance" />
+
+                <Border
+                    Padding="20"
+                    CornerRadius="12">
+
+                    <Grid
+                        ColumnDefinitions="*,220"
+                        RowDefinitions="Auto,Auto"
+                        RowSpacing="20">
+
+                        <StackPanel Grid.Row="0" Spacing="4">
+
+                            <TextBlock
+                                FontSize="15"
+                                FontWeight="SemiBold"
+                                Text="Theme" />
+
+                            <TextBlock
+                                Opacity="0.6"
+                                Text="Choose how Libris should look." />
+
+                        </StackPanel>
+
+                        <ComboBox
+                            Grid.Row="0"
+                            Grid.Column="1"
+                            SelectedItem="{Binding Theme}"
+                            ItemsSource="{Binding AvailableThemes}" />
+
+                        <StackPanel
+                            Grid.Row="1"
+                            Spacing="4">
+
+                            <TextBlock
+                                FontSize="15"
+                                FontWeight="SemiBold"
+                                Text="Accent Color" />
+
+                            <TextBlock
+                                Opacity="0.6"
+                                Text="Choose the application's accent color." />
+
+                        </StackPanel>
+
+                        <ComboBox
+                            Grid.Row="1"
+                            Grid.Column="1"
+                            SelectedItem="{Binding AccentColor}"
+                            ItemsSource="{Binding AvailableAccentColors}" />
+
+                    </Grid>
+
+                </Border>
+
+            </StackPanel>
+
+
+            <!-- Reading -->
+
+            <StackPanel Spacing="16">
+
+                <TextBlock
+                    FontSize="20"
+                    FontWeight="SemiBold"
+                    Text="Reading" />
+
+                <Border
+                    Padding="20"
+                    CornerRadius="12">
+
+                    <Grid
+                        ColumnDefinitions="*,220"
+                        RowDefinitions="Auto,Auto,Auto,Auto"
+                        RowSpacing="20">
+
+                        <!-- Font -->
+
+                        <StackPanel
+                            Grid.Row="0"
+                            Spacing="4">
+
+                            <TextBlock
+                                FontSize="15"
+                                FontWeight="SemiBold"
+                                Text="Default Font" />
+
+                            <TextBlock
+                                Opacity="0.6"
+                                Text="Font used when opening a book." />
+
+                        </StackPanel>
+
+                        <ComboBox
+                            Grid.Row="0"
+                            Grid.Column="1"
+                            SelectedItem="{Binding DefaultFont}"
+                            ItemsSource="{Binding AvailableFonts}" />
+
+
+                        <!-- Font Size -->
+
+                        <StackPanel
+                            Grid.Row="1"
+                            Spacing="4">
+
+                            <TextBlock
+                                FontSize="15"
+                                FontWeight="SemiBold"
+                                Text="Font Size" />
+
+                            <TextBlock
+                                Opacity="0.6"
+                                Text="Default reading text size." />
+
+                        </StackPanel>
+
+                        <NumericUpDown
+                            Grid.Row="1"
+                            Grid.Column="1"
+                            Minimum="10"
+                            Maximum="40"
+                            Increment="1"
+                            Value="{Binding FontSize}" />
+
+
+                        <!-- Line Spacing -->
+
+                        <StackPanel
+                            Grid.Row="2"
+                            Spacing="4">
+
+                            <TextBlock
+                                FontSize="15"
+                                FontWeight="SemiBold"
+                                Text="Line Spacing" />
+
+                            <TextBlock
+                                Opacity="0.6"
+                                Text="Space between lines of text." />
+
+                        </StackPanel>
+
+                        <NumericUpDown
+                            Grid.Row="2"
+                            Grid.Column="1"
+                            Minimum="1"
+                            Maximum="3"
+                            Increment="0.1"
+                            Value="{Binding LineSpacing}" />
+
+
+                        <!-- Reading Width -->
+
+                        <StackPanel
+                            Grid.Row="3"
+                            Spacing="4">
+
+                            <TextBlock
+                                FontSize="15"
+                                FontWeight="SemiBold"
+                                Text="Reading Width" />
+
+                            <TextBlock
+                                Opacity="0.6"
+                                Text="Maximum width of the reading area." />
+
+                        </StackPanel>
+
+                        <NumericUpDown
+                            Grid.Row="3"
+                            Grid.Column="1"
+                            Minimum="400"
+                            Maximum="1200"
+                            Increment="20"
+                            Value="{Binding ReadingWidth}" />
+
+                    </Grid>
+
+                </Border>
+
+            </StackPanel>
+
+
+            <!-- Library -->
+
+            <StackPanel Spacing="16">
+
+                <TextBlock
+                    FontSize="20"
+                    FontWeight="SemiBold"
+                    Text="Library" />
+
+                <Border
+                    Padding="20"
+                    CornerRadius="12">
+
+                    <Grid
+                        ColumnDefinitions="*,220"
+                        RowDefinitions="Auto,Auto,Auto"
+                        RowSpacing="20">
+
+                        <!-- Sorting -->
+
+                        <StackPanel
+                            Grid.Row="0"
+                            Spacing="4">
+
+                            <TextBlock
+                                FontSize="15"
+                                FontWeight="SemiBold"
+                                Text="Default Sorting" />
+
+                            <TextBlock
+                                Opacity="0.6"
+                                Text="How books are sorted by default." />
+
+                        </StackPanel>
+
+                        <ComboBox
+                            Grid.Row="0"
+                            Grid.Column="1"
+                            SelectedItem="{Binding DefaultSorting}"
+                            ItemsSource="{Binding AvailableSortingOptions}" />
+
+
+                        <!-- Progress -->
+
+                        <StackPanel
+                            Grid.Row="1"
+                            Spacing="4">
+
+                            <TextBlock
+                                FontSize="15"
+                                FontWeight="SemiBold"
+                                Text="Show Progress" />
+
+                            <TextBlock
+                                Opacity="0.6"
+                                Text="Display reading progress in the library." />
+
+                        </StackPanel>
+
+                        <ToggleSwitch
+                            Grid.Row="1"
+                            Grid.Column="1"
+                            HorizontalAlignment="Right"
+                            IsChecked="{Binding ShowProgress}" />
+
+
+                        <!-- Cover Size -->
+
+                        <StackPanel
+                            Grid.Row="2"
+                            Spacing="4">
+
+                            <TextBlock
+                                FontSize="15"
+                                FontWeight="SemiBold"
+                                Text="Cover Size" />
+
+                            <TextBlock
+                                Opacity="0.6"
+                                Text="Default size of book covers." />
+
+                        </StackPanel>
+
+                        <NumericUpDown
+                            Grid.Row="2"
+                            Grid.Column="1"
+                            Minimum="80"
+                            Maximum="300"
+                            Increment="10"
+                            Value="{Binding CoverSize}" />
+
+                    </Grid>
+
+                </Border>
+
+            </StackPanel>
+
+        </StackPanel>
+
+    </ScrollViewer>
+
+</UserControl>

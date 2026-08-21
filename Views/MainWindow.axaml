@@ -20,9 +20,13 @@
         <vm:MainViewModel />
     </Design.DataContext>
 
-    <Grid RowDefinitions="Auto,*">
+    <Grid
+        HorizontalAlignment="Stretch"
+        VerticalAlignment="Stretch"
+        RowDefinitions="Auto,*">
 
-        <!--  Header  -->
+        <!-- Header -->
+
         <Border
             Grid.Row="0"
             Padding="24,18"
@@ -37,18 +41,30 @@
                     Text="Libris" />
 
             </Grid>
+
         </Border>
 
-        <!--  Main content  -->
-        <Grid Grid.Row="1" ColumnDefinitions="240,*">
 
-            <!--  Navigation  -->
-            <Border Grid.Column="0" Padding="20">
+        <!-- Main content -->
+
+        <Grid
+            Grid.Row="1"
+            ColumnDefinitions="240,*">
+
+
+            <!-- Navigation -->
+
+            <Border
+                Grid.Column="0"
+                Padding="20">
 
                 <Grid RowDefinitions="Auto,*,Auto">
 
-                    <!--  Main navigation  -->
-                    <StackPanel Grid.Row="0" Spacing="8">
+                    <!-- Main navigation -->
+
+                    <StackPanel
+                        Grid.Row="0"
+                        Spacing="8">
 
                         <Button
                             HorizontalContentAlignment="Left"
@@ -62,7 +78,9 @@
 
                     </StackPanel>
 
-                    <!--  Settings  -->
+
+                    <!-- Settings -->
+
                     <Button
                         Grid.Row="2"
                         HorizontalContentAlignment="Left"
@@ -70,32 +88,21 @@
                         Content="Settings" />
 
                 </Grid>
+
             </Border>
 
-            <!--  Content  -->
-            <Border Grid.Column="1" Padding="48">
 
-                <Grid>
+            <!-- Content -->
 
-                    <StackPanel
-                        HorizontalAlignment="Center"
-                        VerticalAlignment="Center"
-                        Spacing="8">
+            <Border
+                Grid.Column="1"
+                Padding="48">
 
-                        <TextBlock
-                            HorizontalAlignment="Center"
-                            FontSize="36"
-                            FontWeight="SemiBold"
-                            Text="{Binding CurrentPage}" />
+                <ContentControl
+                    HorizontalContentAlignment="Stretch"
+                    VerticalContentAlignment="Stretch"
+                    Content="{Binding CurrentViewModel}" />
 
-                        <TextBlock
-                            HorizontalAlignment="Center"
-                            Opacity="0.6"
-                            Text="Libris is ready for your books." />
-
-                    </StackPanel>
-
-                </Grid>
             </Border>
 
         </Grid>

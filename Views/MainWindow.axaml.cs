@@ -1,8 +1,9 @@
-using Avalonia.Controls;
+// Views/MainWindow.axaml.cs
+using SukiUI.Controls;
 
 namespace Libris.Views;
 
-public partial class MainWindow : Window
+public partial class MainWindow : SukiWindow
 {
     public MainWindow()
     {

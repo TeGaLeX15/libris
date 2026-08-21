@@ -1,22 +1,105 @@
-<Window xmlns="https://github.com/avaloniaui"
-        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        xmlns:vm="using:Libris.ViewModels"
-        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
-        x:Class="Libris.Views.MainWindow"
-        x:DataType="vm:MainViewModel"
-        Icon="/Assets/avalonia-logo.ico"
-        Title="Libris">
+<!--  Views/MainWindow.axaml  -->
+<suki:SukiWindow
+    x:Class="Libris.Views.MainWindow"
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:suki="clr-namespace:SukiUI.Controls;assembly=SukiUI"
+    xmlns:vm="using:Libris.ViewModels"
+    Title="Libris"
+    MinWidth="900"
+    MinHeight="600"
+    d:DesignHeight="750"
+    d:DesignWidth="1200"
+    x:DataType="vm:MainViewModel"
+    Icon="/Assets/avalonia-logo.ico"
+    mc:Ignorable="d">
 
     <Design.DataContext>
-        <!-- This only sets the DataContext for the previewer in an IDE,
-             to set the actual DataContext for runtime, set the DataContext property in code (look at App.axaml.cs) -->
         <vm:MainViewModel />
     </Design.DataContext>
 
-    <TextBox Text="{Binding Greeting}"
-             HorizontalAlignment="Center"
-             VerticalAlignment="Center" />
+    <Grid RowDefinitions="Auto,*">
 
-</Window>
+        <!--  Header  -->
+        <Border
+            Grid.Row="0"
+            Padding="24,18"
+            BorderThickness="0,0,0,1">
+
+            <Grid ColumnDefinitions="*,Auto">
+
+                <TextBlock
+                    VerticalAlignment="Center"
+                    FontSize="22"
+                    FontWeight="SemiBold"
+                    Text="Libris" />
+
+            </Grid>
+        </Border>
+
+        <!--  Main content  -->
+        <Grid Grid.Row="1" ColumnDefinitions="240,*">
+
+            <!--  Navigation  -->
+            <Border Grid.Column="0" Padding="20">
+
+                <Grid RowDefinitions="Auto,*,Auto">
+
+                    <!--  Main navigation  -->
+                    <StackPanel Grid.Row="0" Spacing="8">
+
+                        <Button
+                            HorizontalContentAlignment="Left"
+                            Command="{Binding NavigateToLibraryCommand}"
+                            Content="Library" />
+
+                        <Button
+                            HorizontalContentAlignment="Left"
+                            Command="{Binding NavigateToCollectionsCommand}"
+                            Content="Collections" />
+
+                    </StackPanel>
+
+                    <!--  Settings  -->
+                    <Button
+                        Grid.Row="2"
+                        HorizontalContentAlignment="Left"
+                        Command="{Binding NavigateToSettingsCommand}"
+                        Content="Settings" />
+
+                </Grid>
+            </Border>
+
+            <!--  Content  -->
+            <Border Grid.Column="1" Padding="48">
+
+                <Grid>
+
+                    <StackPanel
+                        HorizontalAlignment="Center"
+                        VerticalAlignment="Center"
+                        Spacing="8">
+
+                        <TextBlock
+                            HorizontalAlignment="Center"
+                            FontSize="36"
+                            FontWeight="SemiBold"
+                            Text="{Binding CurrentPage}" />
+
+                        <TextBlock
+                            HorizontalAlignment="Center"
+                            Opacity="0.6"
+                            Text="Libris is ready for your books." />
+
+                    </StackPanel>
+
+                </Grid>
+            </Border>
+
+        </Grid>
+
+    </Grid>
+
+</suki:SukiWindow>

@@ -1,4 +1,5 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
+﻿// ViewModels/ViewModelBase.cs
+using CommunityToolkit.Mvvm.ComponentModel;
 
 namespace Libris.ViewModels;
 

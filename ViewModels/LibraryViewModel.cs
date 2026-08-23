@@ -1,6 +1,8 @@
 // ViewModels/LibraryViewModel.cs
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Linq;
 using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.ComponentModel;
 using Libris.Models;
@@ -13,14 +15,26 @@ public partial class LibraryViewModel : ViewModelBase
     private readonly LibraryService _libraryService;
 
     public ObservableCollection<Book> Books { get; } = [];
+    public ObservableCollection<Book> FilteredBooks { get; } = [];
 
     [ObservableProperty]
     private bool isEmpty;
+
+    [ObservableProperty]
+    private bool isSearchEmpty;
+
+    [ObservableProperty]
+    private string searchQuery = string.Empty;
 
     public LibraryViewModel()
     {
         _libraryService = new LibraryService();
         LoadBooks();
+    }
+
+    partial void OnSearchQueryChanged(string value)
+    {
+        ApplyFilter();
     }
 
     private void LoadBooks()
@@ -32,7 +46,7 @@ public partial class LibraryViewModel : ViewModelBase
             Books.Add(book);
         }
 
-        UpdateEmptyState();
+        ApplyFilter();
     }
 
     public async Task AddBooksAsync(IEnumerable<string> filePaths)
@@ -50,7 +64,7 @@ public partial class LibraryViewModel : ViewModelBase
             Books.Add(book);
         }
 
-        UpdateEmptyState();
+        ApplyFilter();
     }
 
     public void RemoveBook(Book? book)
@@ -61,11 +75,45 @@ public partial class LibraryViewModel : ViewModelBase
         _libraryService.Remove(book.Id);
         Books.Remove(book);
 
-        UpdateEmptyState();
+        ApplyFilter();
     }
 
-    private void UpdateEmptyState()
+    private void ApplyFilter()
     {
+        var query = SearchQuery.Trim();
+
+        FilteredBooks.Clear();
+
+        IEnumerable<Book> result;
+
+        if (string.IsNullOrWhiteSpace(query))
+        {
+            result = Books;
+        }
+        else
+        {
+            result = Books.Where(book =>
+                (!string.IsNullOrWhiteSpace(book.Title) &&
+                 book.Title.Contains(
+                     query,
+                     StringComparison.OrdinalIgnoreCase))
+                ||
+                (!string.IsNullOrWhiteSpace(book.Author) &&
+                 book.Author.Contains(
+                     query,
+                     StringComparison.OrdinalIgnoreCase)));
+        }
+
+        foreach (var book in result)
+        {
+            FilteredBooks.Add(book);
+        }
+
         IsEmpty = Books.Count == 0;
+
+        IsSearchEmpty =
+            !IsEmpty &&
+            !string.IsNullOrWhiteSpace(query) &&
+            FilteredBooks.Count == 0;
     }
 }

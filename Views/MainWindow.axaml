@@ -9,7 +9,7 @@
     xmlns:views="using:Libris.Views"
     xmlns:vm="using:Libris.ViewModels"
     Title="Libris"
-    Width="1200"
+    Width="1245"
     Height="800"
     MinWidth="870"
     MinHeight="700"

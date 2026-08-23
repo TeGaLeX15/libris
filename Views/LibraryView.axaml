@@ -16,6 +16,7 @@
     </UserControl.Resources>
 
     <Grid>
+
         <ScrollViewer HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto">
 
             <Grid Margin="28,24,28,32" RowDefinitions="Auto,*">
@@ -24,12 +25,13 @@
                 <Grid
                     Grid.Row="0"
                     Margin="0,0,0,28"
-                    VerticalAlignment="Top"
-                    ColumnDefinitions="*,Auto">
+                    ColumnDefinitions="Auto,*,Auto"
+                    ColumnSpacing="20">
 
+                    <!--  Title  -->
                     <StackPanel
                         Grid.Column="0"
-                        Margin="0,0,24,0"
+                        VerticalAlignment="Center"
                         Spacing="5">
 
                         <TextBlock
@@ -44,8 +46,31 @@
 
                     </StackPanel>
 
-                    <Button
+                    <!-- Search -->
+                    <Border
                         Grid.Column="1"
+                        MinWidth="280"
+                        MaxWidth="420"
+                        Padding="14,4"
+                        VerticalAlignment="Center"
+                        Background="Transparent"
+                        BorderBrush="{DynamicResource ThemeBorderLowBrush}"
+                        BorderThickness="1"
+                        CornerRadius="10">
+
+                        <TextBox
+                            BorderThickness="0"
+                            Background="Transparent"
+                            FontSize="14"
+                            Padding="4,6"
+                            PlaceholderText="Search your library..."
+                            Text="{Binding SearchQuery, Mode=TwoWay}" />
+
+                    </Border>
+
+                    <!--  Add books  -->
+                    <Button
+                        Grid.Column="2"
                         Padding="20,10"
                         VerticalAlignment="Center"
                         Click="AddBooks_Click"
@@ -56,7 +81,7 @@
                 <!--  Content  -->
                 <Grid Grid.Row="1">
 
-                    <!--  Empty state  -->
+                    <!--  Library is completely empty  -->
                     <StackPanel
                         MaxWidth="420"
                         HorizontalAlignment="Center"
@@ -85,19 +110,44 @@
 
                     </StackPanel>
 
+                    <!--  Search returned nothing  -->
+                    <StackPanel
+                        MaxWidth="420"
+                        HorizontalAlignment="Center"
+                        VerticalAlignment="Center"
+                        IsVisible="{Binding IsSearchEmpty}"
+                        Spacing="10">
+
+                        <TextBlock
+                            HorizontalAlignment="Center"
+                            FontSize="26"
+                            FontWeight="SemiBold"
+                            Text="No books found" />
+
+                        <TextBlock
+                            HorizontalAlignment="Center"
+                            Opacity="0.6"
+                            Text="Try a different title or author."
+                            TextAlignment="Center" />
+
+                    </StackPanel>
+
                     <!--  Books  -->
-                    <ItemsControl IsVisible="{Binding !IsEmpty}" ItemsSource="{Binding Books}">
+                    <ItemsControl IsVisible="{Binding !IsEmpty}" ItemsSource="{Binding FilteredBooks}">
 
                         <ItemsControl.ItemsPanel>
                             <ItemsPanelTemplate>
+
                                 <WrapPanel
                                     ItemHeight="304"
                                     ItemWidth="190"
                                     Orientation="Horizontal" />
+
                             </ItemsPanelTemplate>
                         </ItemsControl.ItemsPanel>
 
                         <ItemsControl.ItemTemplate>
+
                             <DataTemplate>
 
                                 <suki:GlassCard
@@ -139,6 +189,7 @@
                                 </suki:GlassCard>
 
                             </DataTemplate>
+
                         </ItemsControl.ItemTemplate>
 
                     </ItemsControl>
@@ -148,6 +199,7 @@
             </Grid>
 
         </ScrollViewer>
+
     </Grid>
 
 </UserControl>

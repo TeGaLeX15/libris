@@ -1,25 +1,122 @@
-<!-- Views/LibraryView.axaml -->
+<!--  Views/LibraryView.axaml  -->
 <UserControl
     x:Class="Libris.Views.LibraryView"
     xmlns="https://github.com/avaloniaui"
-    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:vm="using:Libris.ViewModels"
+    x:DataType="vm:LibraryViewModel"
+    mc:Ignorable="d">
 
-    <StackPanel
-        HorizontalAlignment="Center"
-        VerticalAlignment="Center"
-        Spacing="8">
+    <Grid RowDefinitions="Auto,*">
 
-        <TextBlock
+        <!--  Header  -->
+        <Grid
+            Grid.Row="0"
+            Margin="0,0,0,32"
+            ColumnDefinitions="*,Auto">
+
+            <StackPanel Spacing="4">
+                <TextBlock
+                    FontSize="32"
+                    FontWeight="SemiBold"
+                    Text="Library" />
+
+                <TextBlock Opacity="0.6" Text="Your books in one place." />
+            </StackPanel>
+
+            <Button
+                Grid.Column="1"
+                Padding="20,10"
+                Click="AddBooks_Click"
+                Content="Add books" />
+        </Grid>
+
+        <!--  Empty state  -->
+        <StackPanel
+            Grid.Row="1"
             HorizontalAlignment="Center"
-            FontSize="36"
-            FontWeight="SemiBold"
-            Text="Library" />
+            VerticalAlignment="Center"
+            IsVisible="{Binding IsEmpty}"
+            Spacing="12">
 
-        <TextBlock
-            HorizontalAlignment="Center"
-            Opacity="0.6"
-            Text="Your books will appear here." />
+            <TextBlock
+                HorizontalAlignment="Center"
+                FontSize="28"
+                FontWeight="SemiBold"
+                Text="Your library is empty" />
 
-    </StackPanel>
+            <TextBlock
+                HorizontalAlignment="Center"
+                Opacity="0.6"
+                Text="Add your first books to start reading." />
 
+            <Button
+                Margin="0,12,0,0"
+                Padding="24,12"
+                HorizontalAlignment="Center"
+                Click="AddBooks_Click"
+                Content="Add books" />
+        </StackPanel>
+
+        <!--  Books  -->
+        <ScrollViewer Grid.Row="1" IsVisible="{Binding !IsEmpty}">
+
+            <ItemsControl ItemsSource="{Binding Books}">
+
+                <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <WrapPanel
+                            ItemHeight="280"
+                            ItemWidth="180"
+                            Orientation="Horizontal" />
+                    </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+
+                        <Border
+                            Margin="0,0,20,24"
+                            Padding="12"
+                            CornerRadius="12">
+
+                            <StackPanel Spacing="8">
+
+                                <Border
+                                    Width="156"
+                                    Height="210"
+                                    CornerRadius="8">
+
+                                    <TextBlock
+                                        HorizontalAlignment="Center"
+                                        VerticalAlignment="Center"
+                                        Opacity="0.4"
+                                        Text="BOOK" />
+                                </Border>
+
+                                <TextBlock
+                                    FontWeight="SemiBold"
+                                    Text="{Binding Title}"
+                                    TextTrimming="CharacterEllipsis" />
+
+                                <TextBlock
+                                    FontSize="13"
+                                    Opacity="0.6"
+                                    Text="{Binding Author}"
+                                    TextTrimming="CharacterEllipsis" />
+
+                            </StackPanel>
+
+                        </Border>
+
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+
+            </ItemsControl>
+
+        </ScrollViewer>
+
+    </Grid>
 </UserControl>

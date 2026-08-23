@@ -1,8 +1,6 @@
 // ViewModels/LibraryViewModel.cs
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.IO;
-using System.Linq;
 using CommunityToolkit.Mvvm.ComponentModel;
 using Libris.Models;
 using Libris.Services;
@@ -45,26 +43,11 @@ public partial class LibraryViewModel : ViewModelBase
     {
         foreach (var filePath in filePaths)
         {
-            if (string.IsNullOrWhiteSpace(filePath))
+            var book = _libraryService.Import(filePath);
+
+            if (book is null)
                 continue;
 
-            var existingBook = _libraryService.Load()
-                .FirstOrDefault(x =>
-                    string.Equals(
-                        x.FilePath,
-                        filePath,
-                        System.StringComparison.OrdinalIgnoreCase));
-
-            if (existingBook is not null)
-                continue;
-
-            var book = new Book
-            {
-                FilePath = filePath,
-                Title = Path.GetFileNameWithoutExtension(filePath)
-            };
-
-            _libraryService.Add(book);
             Books.Add(book);
         }
 

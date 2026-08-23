@@ -1,9 +1,8 @@
 // Views/LibraryView.axaml.cs
 using System.Linq;
-using Avalonia;
 using Avalonia.Controls;
-using Avalonia.Platform.Storage;
 using Avalonia.Interactivity;
+using Avalonia.Platform.Storage;
 using Libris.ViewModels;
 
 namespace Libris.Views;
@@ -17,6 +16,9 @@ public partial class LibraryView : UserControl
 
     private async void AddBooks_Click(object? sender, RoutedEventArgs e)
     {
+        if (DataContext is not LibraryViewModel viewModel)
+            return;
+
         var topLevel = TopLevel.GetTopLevel(this);
 
         if (topLevel is null)
@@ -42,15 +44,14 @@ public partial class LibraryView : UserControl
                 ]
             });
 
-        var paths = files
+        if (files.Count == 0)
+            return;
+
+        var filePaths = files
             .Select(file => file.TryGetLocalPath())
             .Where(path => !string.IsNullOrWhiteSpace(path))
-            .Cast<string>()
-            .ToList();
+            .Select(path => path!);
 
-        if (DataContext is LibraryViewModel viewModel)
-        {
-            viewModel.AddBooks(paths);
-        }
+        viewModel.AddBooks(filePaths);
     }
 }

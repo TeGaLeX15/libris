@@ -3,14 +3,20 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Security.Cryptography;
 using System.Text.Json;
+
 using Libris.Models;
 
 namespace Libris.Services;
 
 public sealed class LibraryService
 {
+    private const string BooksFolderName = "Books";
+    private const string LibraryFileName = "library.json";
+
     private readonly string _libraryDirectory;
+    private readonly string _booksDirectory;
     private readonly string _libraryFile;
 
     private static readonly JsonSerializerOptions JsonOptions = new()
@@ -26,9 +32,13 @@ public sealed class LibraryService
                 Environment.SpecialFolder.ApplicationData),
             "Libris");
 
+        _booksDirectory = Path.Combine(
+            _libraryDirectory,
+            BooksFolderName);
+
         _libraryFile = Path.Combine(
             _libraryDirectory,
-            "library.json");
+            LibraryFileName);
     }
 
     public IReadOnlyList<Book> Load()
@@ -69,29 +79,97 @@ public sealed class LibraryService
         }
     }
 
-    public void Add(Book book)
+    public Book? Import(string sourceFilePath)
     {
-        var books = Load().ToList();
-
-        if (books.Any(x =>
-                string.Equals(
-                    x.FilePath,
-                    book.FilePath,
-                    StringComparison.OrdinalIgnoreCase)))
+        try
         {
-            return;
-        }
+            if (string.IsNullOrWhiteSpace(sourceFilePath))
+                return null;
 
-        books.Add(book);
-        Save(books);
+            if (!File.Exists(sourceFilePath))
+                return null;
+
+            var fileHash = CalculateFileHash(sourceFilePath);
+
+            var books = Load().ToList();
+
+            var existingBook = books.FirstOrDefault(book =>
+                !string.IsNullOrWhiteSpace(book.FileHash) &&
+                string.Equals(
+                    book.FileHash,
+                    fileHash,
+                    StringComparison.OrdinalIgnoreCase));
+
+            if (existingBook is not null)
+                return null;
+
+            Directory.CreateDirectory(_booksDirectory);
+
+            var extension = Path.GetExtension(sourceFilePath);
+
+            var book = new Book
+            {
+                FileHash = fileHash,
+                Title = Path.GetFileNameWithoutExtension(sourceFilePath)
+            };
+
+            var destinationFilePath = Path.Combine(
+                _booksDirectory,
+                $"{book.Id}{extension}");
+
+            File.Copy(
+                sourceFilePath,
+                destinationFilePath);
+
+            book.FilePath = destinationFilePath;
+
+            books.Add(book);
+
+            Save(books);
+
+            return book;
+        }
+        catch
+        {
+            return null;
+        }
     }
 
     public void Remove(Guid id)
     {
-        var books = Load()
-            .Where(x => x.Id != id)
-            .ToList();
+        var books = Load().ToList();
+
+        var book = books.FirstOrDefault(
+            x => x.Id == id);
+
+        if (book is null)
+            return;
+
+        books.Remove(book);
+
+        try
+        {
+            if (!string.IsNullOrWhiteSpace(book.FilePath) &&
+                File.Exists(book.FilePath))
+            {
+                File.Delete(book.FilePath);
+            }
+        }
+        catch
+        {
+            // Removing a library entry should not crash the application.
+        }
 
         Save(books);
+    }
+
+    private static string CalculateFileHash(string filePath)
+    {
+        using var stream = File.OpenRead(filePath);
+        using var sha256 = SHA256.Create();
+
+        var hash = sha256.ComputeHash(stream);
+
+        return Convert.ToHexString(hash);
     }
 }

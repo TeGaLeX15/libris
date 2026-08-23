@@ -31,6 +31,7 @@
                 Padding="20,10"
                 Click="AddBooks_Click"
                 Content="Add books" />
+
         </Grid>
 
         <!--  Empty state  -->
@@ -58,6 +59,7 @@
                 HorizontalAlignment="Center"
                 Click="AddBooks_Click"
                 Content="Add books" />
+
         </StackPanel>
 
         <!--  Books  -->
@@ -94,6 +96,7 @@
                                         VerticalAlignment="Center"
                                         Opacity="0.4"
                                         Text="BOOK" />
+
                                 </Border>
 
                                 <TextBlock
@@ -119,4 +122,5 @@
         </ScrollViewer>
 
     </Grid>
+
 </UserControl>

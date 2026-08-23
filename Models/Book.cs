@@ -7,7 +7,16 @@ public sealed class Book
 {
     public Guid Id { get; set; } = Guid.NewGuid();
 
+    /// <summary>
+    /// Path to the managed copy stored by Libris.
+    /// </summary>
     public string FilePath { get; set; } = string.Empty;
+
+    /// <summary>
+    /// SHA-256 hash of the imported file contents.
+    /// Used to detect duplicate books.
+    /// </summary>
+    public string FileHash { get; set; } = string.Empty;
 
     public string Title { get; set; } = string.Empty;
 

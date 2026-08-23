@@ -5,119 +5,151 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:suki="clr-namespace:SukiUI.Controls;assembly=SukiUI"
     xmlns:vm="using:Libris.ViewModels"
     x:DataType="vm:LibraryViewModel"
     mc:Ignorable="d">
 
-    <Grid RowDefinitions="Auto,*">
+    <Grid>
 
-        <!--  Header  -->
-        <Grid
-            Grid.Row="0"
-            Margin="0,0,0,32"
-            ColumnDefinitions="*,Auto">
+        <!--  Main content  -->
+        <ScrollViewer HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto">
 
-            <StackPanel Spacing="4">
-                <TextBlock
-                    FontSize="32"
-                    FontWeight="SemiBold"
-                    Text="Library" />
+            <Grid Margin="28,24,28,32" RowDefinitions="Auto,*">
 
-                <TextBlock Opacity="0.6" Text="Your books in one place." />
-            </StackPanel>
+                <!--  Header  -->
+                <Grid
+                    Grid.Row="0"
+                    Margin="0,0,0,28"
+                    VerticalAlignment="Top"
+                    ColumnDefinitions="*,Auto">
 
-            <Button
-                Grid.Column="1"
-                Padding="20,10"
-                Click="AddBooks_Click"
-                Content="Add books" />
+                    <StackPanel
+                        Grid.Column="0"
+                        Margin="0,0,24,0"
+                        Spacing="5">
 
-        </Grid>
+                        <TextBlock
+                            FontSize="32"
+                            FontWeight="SemiBold"
+                            Text="Library" />
 
-        <!--  Empty state  -->
-        <StackPanel
-            Grid.Row="1"
-            HorizontalAlignment="Center"
-            VerticalAlignment="Center"
-            IsVisible="{Binding IsEmpty}"
-            Spacing="12">
+                        <TextBlock
+                            FontSize="14"
+                            Opacity="0.6"
+                            Text="Your books in one place." />
 
-            <TextBlock
-                HorizontalAlignment="Center"
-                FontSize="28"
-                FontWeight="SemiBold"
-                Text="Your library is empty" />
+                    </StackPanel>
 
-            <TextBlock
-                HorizontalAlignment="Center"
-                Opacity="0.6"
-                Text="Add your first books to start reading." />
+                    <Button
+                        Grid.Column="1"
+                        Padding="20,10"
+                        VerticalAlignment="Center"
+                        Click="AddBooks_Click"
+                        Content="Add books" />
 
-            <Button
-                Margin="0,12,0,0"
-                Padding="24,12"
-                HorizontalAlignment="Center"
-                Click="AddBooks_Click"
-                Content="Add books" />
+                </Grid>
 
-        </StackPanel>
+                <!--  Content  -->
+                <Grid Grid.Row="1">
 
-        <!--  Books  -->
-        <ScrollViewer Grid.Row="1" IsVisible="{Binding !IsEmpty}">
+                    <!--  Empty state  -->
+                    <StackPanel
+                        MaxWidth="420"
+                        HorizontalAlignment="Center"
+                        VerticalAlignment="Center"
+                        IsVisible="{Binding IsEmpty}"
+                        Spacing="10">
 
-            <ItemsControl ItemsSource="{Binding Books}">
+                        <TextBlock
+                            HorizontalAlignment="Center"
+                            FontSize="26"
+                            FontWeight="SemiBold"
+                            Text="Your library is empty" />
 
-                <ItemsControl.ItemsPanel>
-                    <ItemsPanelTemplate>
-                        <WrapPanel
-                            ItemHeight="280"
-                            ItemWidth="180"
-                            Orientation="Horizontal" />
-                    </ItemsPanelTemplate>
-                </ItemsControl.ItemsPanel>
+                        <TextBlock
+                            HorizontalAlignment="Center"
+                            Opacity="0.6"
+                            Text="Add your first books to start reading."
+                            TextAlignment="Center" />
 
-                <ItemsControl.ItemTemplate>
-                    <DataTemplate>
+                        <Button
+                            Margin="0,14,0,0"
+                            Padding="24,12"
+                            HorizontalAlignment="Center"
+                            Click="AddBooks_Click"
+                            Content="Add books" />
 
-                        <Border
-                            Margin="0,0,20,24"
-                            Padding="12"
-                            CornerRadius="12">
+                    </StackPanel>
 
-                            <StackPanel Spacing="8">
+                    <!--  Books  -->
+                    <ItemsControl IsVisible="{Binding !IsEmpty}" ItemsSource="{Binding Books}">
 
-                                <Border
-                                    Width="156"
-                                    Height="210"
-                                    CornerRadius="8">
+                        <ItemsControl.ItemsPanel>
+                            <ItemsPanelTemplate>
 
-                                    <TextBlock
-                                        HorizontalAlignment="Center"
-                                        VerticalAlignment="Center"
-                                        Opacity="0.4"
-                                        Text="BOOK" />
+                                <WrapPanel
+                                    ItemHeight="304"
+                                    ItemWidth="190"
+                                    Orientation="Horizontal" />
 
-                                </Border>
+                            </ItemsPanelTemplate>
+                        </ItemsControl.ItemsPanel>
 
-                                <TextBlock
-                                    FontWeight="SemiBold"
-                                    Text="{Binding Title}"
-                                    TextTrimming="CharacterEllipsis" />
+                        <ItemsControl.ItemTemplate>
 
-                                <TextBlock
-                                    FontSize="13"
-                                    Opacity="0.6"
-                                    Text="{Binding Author}"
-                                    TextTrimming="CharacterEllipsis" />
+                            <DataTemplate>
 
-                            </StackPanel>
+                                <suki:GlassCard
+                                    Width="174"
+                                    Margin="0,0,16,20"
+                                    Padding="10"
+                                    IsAnimated="True"
+                                    IsInteractive="True">
 
-                        </Border>
+                                    <StackPanel Spacing="9">
 
-                    </DataTemplate>
-                </ItemsControl.ItemTemplate>
+                                        <!--  Cover  -->
+                                        <Border
+                                            Width="154"
+                                            Height="214"
+                                            CornerRadius="8">
 
-            </ItemsControl>
+                                            <TextBlock
+                                                HorizontalAlignment="Center"
+                                                VerticalAlignment="Center"
+                                                Opacity="0.4"
+                                                Text="BOOK" />
+
+                                        </Border>
+
+                                        <!--  Title  -->
+                                        <TextBlock
+                                            FontWeight="SemiBold"
+                                            MaxLines="2"
+                                            Text="{Binding Title}"
+                                            TextTrimming="CharacterEllipsis" />
+
+                                        <!--  Author  -->
+                                        <TextBlock
+                                            FontSize="13"
+                                            Opacity="0.6"
+                                            Text="{Binding Author}"
+                                            TextTrimming="CharacterEllipsis" />
+
+                                    </StackPanel>
+
+                                </suki:GlassCard>
+
+                            </DataTemplate>
+
+                        </ItemsControl.ItemTemplate>
+
+                    </ItemsControl>
+
+                </Grid>
+
+            </Grid>
 
         </ScrollViewer>
 

@@ -1,25 +1,46 @@
-<!-- Views/CollectionsView.axaml -->
+<!--  Views/CollectionsView.axaml  -->
 <UserControl
     x:Class="Libris.Views.CollectionsView"
     xmlns="https://github.com/avaloniaui"
-    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:suki="clr-namespace:SukiUI.Controls;assembly=SukiUI"
+    mc:Ignorable="d">
 
-    <StackPanel
-        HorizontalAlignment="Center"
-        VerticalAlignment="Center"
-        Spacing="8">
+    <ScrollViewer HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto">
 
-        <TextBlock
-            HorizontalAlignment="Center"
-            FontSize="36"
-            FontWeight="SemiBold"
-            Text="Collections" />
+        <Grid MinHeight="400" Margin="24">
 
-        <TextBlock
-            HorizontalAlignment="Center"
-            Opacity="0.6"
-            Text="Your collections will appear here." />
+            <suki:GlassCard
+                Width="420"
+                MaxWidth="600"
+                Padding="32"
+                HorizontalAlignment="Center"
+                VerticalAlignment="Center"
+                IsAnimated="True">
 
-    </StackPanel>
+                <StackPanel HorizontalAlignment="Center" Spacing="12">
+
+                    <TextBlock
+                        HorizontalAlignment="Center"
+                        FontSize="30"
+                        FontWeight="SemiBold"
+                        Text="Collections" />
+
+                    <TextBlock
+                        MaxWidth="360"
+                        HorizontalAlignment="Center"
+                        Opacity="0.6"
+                        Text="Your collections will appear here."
+                        TextAlignment="Center" />
+
+                </StackPanel>
+
+            </suki:GlassCard>
+
+        </Grid>
+
+    </ScrollViewer>
 
 </UserControl>

@@ -19,6 +19,7 @@ public partial class LibraryViewModel : ViewModelBase
     public LibraryViewModel()
     {
         _libraryService = new LibraryService();
+
         LoadBooks();
     }
 
@@ -34,15 +35,13 @@ public partial class LibraryViewModel : ViewModelBase
         UpdateEmptyState();
     }
 
-    private void UpdateEmptyState()
-    {
-        IsEmpty = Books.Count == 0;
-    }
-
     public void AddBooks(IEnumerable<string> filePaths)
     {
         foreach (var filePath in filePaths)
         {
+            if (string.IsNullOrWhiteSpace(filePath))
+                continue;
+
             var book = _libraryService.Import(filePath);
 
             if (book is null)
@@ -60,8 +59,14 @@ public partial class LibraryViewModel : ViewModelBase
             return;
 
         _libraryService.Remove(book.Id);
+
         Books.Remove(book);
 
         UpdateEmptyState();
+    }
+
+    private void UpdateEmptyState()
+    {
+        IsEmpty = Books.Count == 0;
     }
 }

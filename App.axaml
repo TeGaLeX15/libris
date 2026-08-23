@@ -12,7 +12,7 @@
     </Application.DataTemplates>
 
     <Application.Styles>
-        <suki:SukiTheme ThemeColor="Blue" />
+        <suki:SukiTheme Locale="en-US" ThemeColor="Blue" />
     </Application.Styles>
 
 </Application>

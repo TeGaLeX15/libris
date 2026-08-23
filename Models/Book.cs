@@ -24,6 +24,9 @@ public sealed class Book
 
     public string? CoverPath { get; set; }
 
+    /// <summary>
+    /// Reading progress from 0.0 to 1.0.
+    /// </summary>
     public double Progress { get; set; }
 
     public DateTime AddedAt { get; set; } = DateTime.UtcNow;

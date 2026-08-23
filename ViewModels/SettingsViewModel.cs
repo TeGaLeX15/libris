@@ -48,31 +48,31 @@ public partial class SettingsViewModel : ViewModelBase
     ];
 
     [ObservableProperty]
-    private string theme;
+    private string theme = "System";
 
     [ObservableProperty]
-    private string accentColor;
+    private string accentColor = "Blue";
 
     [ObservableProperty]
-    private string defaultFont;
+    private string defaultFont = "Inter";
 
     [ObservableProperty]
-    private double fontSize;
+    private double fontSize = 16;
 
     [ObservableProperty]
-    private double lineSpacing;
+    private double lineSpacing = 1.5;
 
     [ObservableProperty]
-    private double readingWidth;
+    private double readingWidth = 800;
 
     [ObservableProperty]
-    private string defaultSorting;
+    private string defaultSorting = "Recently Added";
 
     [ObservableProperty]
-    private bool showProgress;
+    private bool showProgress = true;
 
     [ObservableProperty]
-    private double coverSize;
+    private double coverSize = 180;
 
     public SettingsViewModel(SettingsService settingsService)
     {
@@ -81,18 +81,18 @@ public partial class SettingsViewModel : ViewModelBase
 
         _sukiTheme = SukiTheme.GetInstance();
 
-        theme = _settings.Theme;
-        accentColor = _settings.AccentColor;
-        defaultFont = _settings.DefaultFont;
-        fontSize = _settings.FontSize;
-        lineSpacing = _settings.LineSpacing;
-        readingWidth = _settings.ReadingWidth;
-        defaultSorting = _settings.DefaultSorting;
-        showProgress = _settings.ShowProgress;
-        coverSize = _settings.CoverSize;
+        Theme = _settings.Theme;
+        AccentColor = _settings.AccentColor;
+        DefaultFont = _settings.DefaultFont;
+        FontSize = _settings.FontSize;
+        LineSpacing = _settings.LineSpacing;
+        ReadingWidth = _settings.ReadingWidth;
+        DefaultSorting = _settings.DefaultSorting;
+        ShowProgress = _settings.ShowProgress;
+        CoverSize = _settings.CoverSize;
 
-        ApplyTheme(theme);
-        ApplyAccentColor(accentColor);
+        ApplyTheme(Theme);
+        ApplyAccentColor(AccentColor);
     }
 
     partial void OnThemeChanged(string value)

@@ -14,7 +14,9 @@ public partial class LibraryView : UserControl
         InitializeComponent();
     }
 
-    private async void AddBooks_Click(object? sender, RoutedEventArgs e)
+    private async void AddBooks_Click(
+        object? sender,
+        RoutedEventArgs e)
     {
         if (DataContext is not LibraryViewModel viewModel)
             return;

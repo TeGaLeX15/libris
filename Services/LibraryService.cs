@@ -4,8 +4,8 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Security.Cryptography;
+using System.Threading.Tasks;
 using System.Text.Json;
-
 using Libris.Models;
 
 namespace Libris.Services;
@@ -13,10 +13,12 @@ namespace Libris.Services;
 public sealed class LibraryService
 {
     private const string BooksFolderName = "Books";
+    private const string CoversFolderName = "Covers";
     private const string LibraryFileName = "library.json";
 
     private readonly string _libraryDirectory;
     private readonly string _booksDirectory;
+    private readonly string _coversDirectory;
     private readonly string _libraryFile;
 
     private static readonly JsonSerializerOptions JsonOptions = new()
@@ -35,6 +37,10 @@ public sealed class LibraryService
         _booksDirectory = Path.Combine(
             _libraryDirectory,
             BooksFolderName);
+
+        _coversDirectory = Path.Combine(
+            _libraryDirectory,
+            CoversFolderName);
 
         _libraryFile = Path.Combine(
             _libraryDirectory,
@@ -71,7 +77,9 @@ public sealed class LibraryService
                 books,
                 JsonOptions);
 
-            File.WriteAllText(_libraryFile, json);
+            File.WriteAllText(
+                _libraryFile,
+                json);
         }
         catch
         {
@@ -79,7 +87,7 @@ public sealed class LibraryService
         }
     }
 
-    public Book? Import(string sourceFilePath)
+    public async Task<Book?> ImportAsync(string sourceFilePath)
     {
         try
         {
@@ -103,6 +111,11 @@ public sealed class LibraryService
             if (existingBook is not null)
                 return null;
 
+            var metadataService = new BookMetadataService();
+
+            var metadata = await metadataService.ReadAsync(
+                sourceFilePath);
+
             Directory.CreateDirectory(_booksDirectory);
 
             var extension = Path.GetExtension(sourceFilePath);
@@ -110,7 +123,12 @@ public sealed class LibraryService
             var book = new Book
             {
                 FileHash = fileHash,
-                Title = Path.GetFileNameWithoutExtension(sourceFilePath)
+
+                Title = string.IsNullOrWhiteSpace(metadata.Title)
+                    ? Path.GetFileNameWithoutExtension(sourceFilePath)
+                    : metadata.Title,
+
+                Author = metadata.Author ?? string.Empty
             };
 
             var destinationFilePath = Path.Combine(
@@ -122,6 +140,13 @@ public sealed class LibraryService
                 destinationFilePath);
 
             book.FilePath = destinationFilePath;
+
+            if (metadata.CoverBytes is { Length: > 0 })
+            {
+                book.CoverPath = SaveCover(
+                    book.Id,
+                    metadata.CoverBytes);
+            }
 
             books.Add(book);
 
@@ -154,6 +179,12 @@ public sealed class LibraryService
             {
                 File.Delete(book.FilePath);
             }
+
+            if (!string.IsNullOrWhiteSpace(book.CoverPath) &&
+                File.Exists(book.CoverPath))
+            {
+                File.Delete(book.CoverPath);
+            }
         }
         catch
         {
@@ -163,7 +194,25 @@ public sealed class LibraryService
         Save(books);
     }
 
-    private static string CalculateFileHash(string filePath)
+    private string SaveCover(
+        Guid bookId,
+        byte[] coverBytes)
+    {
+        Directory.CreateDirectory(_coversDirectory);
+
+        var coverPath = Path.Combine(
+            _coversDirectory,
+            $"{bookId}.jpg");
+
+        File.WriteAllBytes(
+            coverPath,
+            coverBytes);
+
+        return coverPath;
+    }
+
+    private static string CalculateFileHash(
+        string filePath)
     {
         using var stream = File.OpenRead(filePath);
         using var sha256 = SHA256.Create();

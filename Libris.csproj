@@ -37,6 +37,8 @@
 
         <PackageReference Include="SukiUI" Version="7.0.1" />
 
+        <PackageReference Include="VersOne.Epub" Version="3.3.6" />
+
     </ItemGroup>
 
 </Project>

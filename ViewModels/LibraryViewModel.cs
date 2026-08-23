@@ -1,6 +1,7 @@
 // ViewModels/LibraryViewModel.cs
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.ComponentModel;
 using Libris.Models;
 using Libris.Services;
@@ -19,7 +20,6 @@ public partial class LibraryViewModel : ViewModelBase
     public LibraryViewModel()
     {
         _libraryService = new LibraryService();
-
         LoadBooks();
     }
 
@@ -35,14 +35,14 @@ public partial class LibraryViewModel : ViewModelBase
         UpdateEmptyState();
     }
 
-    public void AddBooks(IEnumerable<string> filePaths)
+    public async Task AddBooksAsync(IEnumerable<string> filePaths)
     {
         foreach (var filePath in filePaths)
         {
             if (string.IsNullOrWhiteSpace(filePath))
                 continue;
 
-            var book = _libraryService.Import(filePath);
+            var book = await _libraryService.ImportAsync(filePath);
 
             if (book is null)
                 continue;
@@ -59,7 +59,6 @@ public partial class LibraryViewModel : ViewModelBase
             return;
 
         _libraryService.Remove(book.Id);
-
         Books.Remove(book);
 
         UpdateEmptyState();

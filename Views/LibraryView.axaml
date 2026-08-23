@@ -3,6 +3,7 @@
     x:Class="Libris.Views.LibraryView"
     xmlns="https://github.com/avaloniaui"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:converters="using:Libris.Converters"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:suki="clr-namespace:SukiUI.Controls;assembly=SukiUI"
@@ -10,9 +11,11 @@
     x:DataType="vm:LibraryViewModel"
     mc:Ignorable="d">
 
-    <Grid>
+    <UserControl.Resources>
+        <converters:BookCoverConverter x:Key="BookCoverConverter" />
+    </UserControl.Resources>
 
-        <!--  Main content  -->
+    <Grid>
         <ScrollViewer HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto">
 
             <Grid Margin="28,24,28,32" RowDefinitions="Auto,*">
@@ -87,17 +90,14 @@
 
                         <ItemsControl.ItemsPanel>
                             <ItemsPanelTemplate>
-
                                 <WrapPanel
                                     ItemHeight="304"
                                     ItemWidth="190"
                                     Orientation="Horizontal" />
-
                             </ItemsPanelTemplate>
                         </ItemsControl.ItemsPanel>
 
                         <ItemsControl.ItemTemplate>
-
                             <DataTemplate>
 
                                 <suki:GlassCard
@@ -113,13 +113,10 @@
                                         <Border
                                             Width="154"
                                             Height="214"
+                                            ClipToBounds="True"
                                             CornerRadius="8">
 
-                                            <TextBlock
-                                                HorizontalAlignment="Center"
-                                                VerticalAlignment="Center"
-                                                Opacity="0.4"
-                                                Text="BOOK" />
+                                            <Image Source="{Binding CoverPath, Converter={StaticResource BookCoverConverter}}" Stretch="UniformToFill" />
 
                                         </Border>
 
@@ -142,7 +139,6 @@
                                 </suki:GlassCard>
 
                             </DataTemplate>
-
                         </ItemsControl.ItemTemplate>
 
                     </ItemsControl>
@@ -152,7 +148,6 @@
             </Grid>
 
         </ScrollViewer>
-
     </Grid>
 
 </UserControl>

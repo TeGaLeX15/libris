@@ -18,11 +18,25 @@ public sealed class Book
     /// </summary>
     public string FileHash { get; set; } = string.Empty;
 
+    // Metadata
+
     public string Title { get; set; } = string.Empty;
 
     public string Author { get; set; } = string.Empty;
 
+    public string? Description { get; set; }
+
+    public string? Publisher { get; set; }
+
+    public string? Language { get; set; }
+
+    public string? Isbn { get; set; }
+
     public string? CoverPath { get; set; }
+
+    public DateTime? PublishedAt { get; set; }
+
+    // Library state
 
     /// <summary>
     /// Reading progress from 0.0 to 1.0.

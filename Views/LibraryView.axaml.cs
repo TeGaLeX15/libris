@@ -26,25 +26,28 @@ public partial class LibraryView : UserControl
         if (topLevel is null)
             return;
 
-        var files = await topLevel.StorageProvider.OpenFilePickerAsync(
-            new FilePickerOpenOptions
-            {
-                Title = "Add books",
-                AllowMultiple = true,
-                FileTypeFilter =
-                [
-                    new FilePickerFileType("Books")
-                    {
-                        Patterns =
-                        [
-                            "*.epub",
-                            "*.fb2",
-                            "*.pdf",
-                            "*.txt"
-                        ]
-                    }
-                ]
-            });
+        var files = await topLevel.StorageProvider
+            .OpenFilePickerAsync(
+                new FilePickerOpenOptions
+                {
+                    Title = "Add books",
+
+                    AllowMultiple = true,
+
+                    FileTypeFilter =
+                    [
+                        new FilePickerFileType("Books")
+                        {
+                            Patterns =
+                            [
+                                "*.epub",
+                                "*.fb2",
+                                "*.pdf",
+                                "*.txt"
+                            ]
+                        }
+                    ]
+                });
 
         if (files.Count == 0)
             return;
@@ -54,6 +57,6 @@ public partial class LibraryView : UserControl
             .Where(path => !string.IsNullOrWhiteSpace(path))
             .Select(path => path!);
 
-        viewModel.AddBooks(filePaths);
+        await viewModel.AddBooksAsync(filePaths);
     }
 }

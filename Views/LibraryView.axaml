@@ -17,19 +17,22 @@
     </UserControl.Resources>
 
     <Grid>
+        <ScrollViewer
+            HorizontalScrollBarVisibility="Disabled"
+            VerticalScrollBarVisibility="Auto">
 
-        <ScrollViewer HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto">
+            <Grid
+                Margin="28,24,28,32"
+                RowDefinitions="Auto,*">
 
-            <Grid Margin="28,24,28,32" RowDefinitions="Auto,*">
-
-                <!--  Header  -->
+                <!-- Header -->
                 <Grid
                     Grid.Row="0"
                     Margin="0,0,0,28"
-                    ColumnDefinitions="Auto,*,Auto"
-                    ColumnSpacing="20">
+                    ColumnDefinitions="Auto,*,Auto,Auto"
+                    ColumnSpacing="12">
 
-                    <!--  Title  -->
+                    <!-- Title -->
                     <StackPanel
                         Grid.Column="0"
                         VerticalAlignment="Center"
@@ -67,11 +70,20 @@
                             FontSize="14"
                             PlaceholderText="Search your library..."
                             Text="{Binding SearchQuery, Mode=TwoWay}" />
+
                     </Border>
 
-                    <!--  Add books  -->
-                    <Button
+                    <!-- Sort -->
+                    <ComboBox
                         Grid.Column="2"
+                        Width="145"
+                        VerticalAlignment="Center"
+                        ItemsSource="{Binding SortOptions}"
+                        SelectedItem="{Binding SelectedSort, Mode=TwoWay}" />
+
+                    <!-- Add books -->
+                    <Button
+                        Grid.Column="3"
                         Padding="20,10"
                         VerticalAlignment="Center"
                         Click="AddBooks_Click"
@@ -79,10 +91,10 @@
 
                 </Grid>
 
-                <!--  Content  -->
+                <!-- Content -->
                 <Grid Grid.Row="1">
 
-                    <!--  Empty library  -->
+                    <!-- Empty library -->
                     <StackPanel
                         MaxWidth="420"
                         HorizontalAlignment="Center"
@@ -111,7 +123,7 @@
 
                     </StackPanel>
 
-                    <!--  Search returned nothing  -->
+                    <!-- Search returned nothing -->
                     <StackPanel
                         MaxWidth="420"
                         HorizontalAlignment="Center"
@@ -133,7 +145,7 @@
 
                     </StackPanel>
 
-                    <!--  Books  -->
+                    <!-- Books -->
                     <ItemsControl
                         HorizontalAlignment="Stretch"
                         IsVisible="{Binding !IsEmpty}"
@@ -162,8 +174,10 @@
                                     HorizontalAlignment="Left"
                                     IsAnimated="True"
                                     IsInteractive="True">
+
                                     <Grid RowDefinitions="226,*">
-                                        <!--  Cover  -->
+
+                                        <!-- Cover -->
                                         <Border
                                             Grid.Row="0"
                                             Height="226"
@@ -171,14 +185,20 @@
                                             VerticalAlignment="Top"
                                             ClipToBounds="True"
                                             CornerRadius="10,10,0,0">
-                                            <Image Source="{Binding CoverPath, Converter={StaticResource BookCoverConverter}}" Stretch="UniformToFill" />
+
+                                            <Image
+                                                Source="{Binding CoverPath, Converter={StaticResource BookCoverConverter}}"
+                                                Stretch="UniformToFill" />
+
                                         </Border>
-                                        <!--  Information  -->
+
+                                        <!-- Information -->
                                         <Grid
                                             Grid.Row="1"
                                             Margin="12,10,12,11"
                                             RowDefinitions="Auto,Auto,*">
-                                            <!--  Title  -->
+
+                                            <!-- Title -->
                                             <TextBlock
                                                 Grid.Row="0"
                                                 FontSize="14"
@@ -187,7 +207,8 @@
                                                 MaxLines="2"
                                                 Text="{Binding Title}"
                                                 TextWrapping="Wrap" />
-                                            <!--  Author  -->
+
+                                            <!-- Author -->
                                             <TextBlock
                                                 Grid.Row="1"
                                                 Margin="0,4,0,0"
@@ -196,8 +217,11 @@
                                                 Text="{Binding Author}"
                                                 TextTrimming="CharacterEllipsis"
                                                 TextWrapping="NoWrap" />
+
                                         </Grid>
+
                                     </Grid>
+
                                 </suki:GlassCard>
 
                             </DataTemplate>
@@ -210,7 +234,6 @@
             </Grid>
 
         </ScrollViewer>
-
     </Grid>
 
 </UserControl>

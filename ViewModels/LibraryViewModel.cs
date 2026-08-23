@@ -17,6 +17,14 @@ public partial class LibraryViewModel : ViewModelBase
     public ObservableCollection<Book> Books { get; } = [];
     public ObservableCollection<Book> FilteredBooks { get; } = [];
 
+    public IReadOnlyList<string> SortOptions { get; } =
+    [
+        "Title: A–Z",
+        "Title: Z–A",
+        "Author: A–Z",
+        "Author: Z–A"
+    ];
+
     [ObservableProperty]
     private bool isEmpty;
 
@@ -26,13 +34,22 @@ public partial class LibraryViewModel : ViewModelBase
     [ObservableProperty]
     private string searchQuery = string.Empty;
 
+    [ObservableProperty]
+    private string selectedSort = "Title: A–Z";
+
     public LibraryViewModel()
     {
         _libraryService = new LibraryService();
+
         LoadBooks();
     }
 
     partial void OnSearchQueryChanged(string value)
+    {
+        ApplyFilter();
+    }
+
+    partial void OnSelectedSortChanged(string value)
     {
         ApplyFilter();
     }
@@ -82,17 +99,12 @@ public partial class LibraryViewModel : ViewModelBase
     {
         var query = SearchQuery.Trim();
 
-        FilteredBooks.Clear();
+        IEnumerable<Book> result = Books;
 
-        IEnumerable<Book> result;
-
-        if (string.IsNullOrWhiteSpace(query))
+        // Search
+        if (!string.IsNullOrWhiteSpace(query))
         {
-            result = Books;
-        }
-        else
-        {
-            result = Books.Where(book =>
+            result = result.Where(book =>
                 (!string.IsNullOrWhiteSpace(book.Title) &&
                  book.Title.Contains(
                      query,
@@ -103,6 +115,34 @@ public partial class LibraryViewModel : ViewModelBase
                      query,
                      StringComparison.OrdinalIgnoreCase)));
         }
+
+        // Sorting
+        result = SelectedSort switch
+        {
+            "Title: A–Z" => result
+                .OrderBy(book => book.Title ?? string.Empty,
+                    StringComparer.CurrentCultureIgnoreCase),
+
+            "Title: Z–A" => result
+                .OrderByDescending(book => book.Title ?? string.Empty,
+                    StringComparer.CurrentCultureIgnoreCase),
+
+            "Author: A–Z" => result
+                .OrderBy(book => book.Author ?? string.Empty,
+                    StringComparer.CurrentCultureIgnoreCase)
+                .ThenBy(book => book.Title ?? string.Empty,
+                    StringComparer.CurrentCultureIgnoreCase),
+
+            "Author: Z–A" => result
+                .OrderByDescending(book => book.Author ?? string.Empty,
+                    StringComparer.CurrentCultureIgnoreCase)
+                .ThenBy(book => book.Title ?? string.Empty,
+                    StringComparer.CurrentCultureIgnoreCase),
+
+            _ => result
+        };
+
+        FilteredBooks.Clear();
 
         foreach (var book in result)
         {

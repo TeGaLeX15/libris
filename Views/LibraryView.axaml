@@ -3,6 +3,7 @@
     x:Class="Libris.Views.LibraryView"
     xmlns="https://github.com/avaloniaui"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:controls="using:Libris.Controls"
     xmlns:converters="using:Libris.Converters"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
@@ -49,23 +50,23 @@
                     <!-- Search -->
                     <Border
                         Grid.Column="1"
-                        MinWidth="280"
-                        MaxWidth="420"
+                        MinWidth="220"
+                        MaxWidth="460"
                         Padding="14,4"
+                        HorizontalAlignment="Stretch"
                         VerticalAlignment="Center"
-                        Background="Transparent"
-                        BorderBrush="{DynamicResource ThemeBorderLowBrush}"
+                        Background="#0DFFFFFF"
+                        BorderBrush="#18FFFFFF"
                         BorderThickness="1"
                         CornerRadius="10">
 
                         <TextBox
-                            BorderThickness="0"
-                            Background="Transparent"
-                            FontSize="14"
                             Padding="4,6"
+                            Background="Transparent"
+                            BorderThickness="0"
+                            FontSize="14"
                             PlaceholderText="Search your library..."
                             Text="{Binding SearchQuery, Mode=TwoWay}" />
-
                     </Border>
 
                     <!--  Add books  -->
@@ -81,7 +82,7 @@
                 <!--  Content  -->
                 <Grid Grid.Row="1">
 
-                    <!--  Library is completely empty  -->
+                    <!--  Empty library  -->
                     <StackPanel
                         MaxWidth="420"
                         HorizontalAlignment="Center"
@@ -133,63 +134,73 @@
                     </StackPanel>
 
                     <!--  Books  -->
-                    <ItemsControl IsVisible="{Binding !IsEmpty}" ItemsSource="{Binding FilteredBooks}">
+                    <ItemsControl
+                        HorizontalAlignment="Stretch"
+                        IsVisible="{Binding !IsEmpty}"
+                        ItemsSource="{Binding FilteredBooks}">
 
                         <ItemsControl.ItemsPanel>
                             <ItemsPanelTemplate>
 
-                                <WrapPanel
-                                    ItemHeight="304"
-                                    ItemWidth="190"
-                                    Orientation="Horizontal" />
+                                <controls:ResponsiveWrapPanel
+                                    HorizontalAlignment="Stretch"
+                                    HorizontalSpacing="18"
+                                    ItemHeight="324"
+                                    ItemWidth="184"
+                                    VerticalSpacing="22" />
 
                             </ItemsPanelTemplate>
                         </ItemsControl.ItemsPanel>
 
                         <ItemsControl.ItemTemplate>
-
                             <DataTemplate>
 
                                 <suki:GlassCard
-                                    Width="174"
-                                    Margin="0,0,16,20"
-                                    Padding="10"
+                                    Width="184"
+                                    Height="324"
+                                    Padding="0"
+                                    HorizontalAlignment="Left"
                                     IsAnimated="True"
                                     IsInteractive="True">
-
-                                    <StackPanel Spacing="9">
-
+                                    <Grid RowDefinitions="226,*">
                                         <!--  Cover  -->
                                         <Border
-                                            Width="154"
-                                            Height="214"
+                                            Grid.Row="0"
+                                            Height="226"
+                                            HorizontalAlignment="Stretch"
+                                            VerticalAlignment="Top"
                                             ClipToBounds="True"
-                                            CornerRadius="8">
-
+                                            CornerRadius="10,10,0,0">
                                             <Image Source="{Binding CoverPath, Converter={StaticResource BookCoverConverter}}" Stretch="UniformToFill" />
-
                                         </Border>
-
-                                        <!--  Title  -->
-                                        <TextBlock
-                                            FontWeight="SemiBold"
-                                            MaxLines="2"
-                                            Text="{Binding Title}"
-                                            TextTrimming="CharacterEllipsis" />
-
-                                        <!--  Author  -->
-                                        <TextBlock
-                                            FontSize="13"
-                                            Opacity="0.6"
-                                            Text="{Binding Author}"
-                                            TextTrimming="CharacterEllipsis" />
-
-                                    </StackPanel>
-
+                                        <!--  Information  -->
+                                        <Grid
+                                            Grid.Row="1"
+                                            Margin="12,10,12,11"
+                                            RowDefinitions="Auto,Auto,*">
+                                            <!--  Title  -->
+                                            <TextBlock
+                                                Grid.Row="0"
+                                                FontSize="14"
+                                                FontWeight="SemiBold"
+                                                LineHeight="19"
+                                                MaxLines="2"
+                                                Text="{Binding Title}"
+                                                TextWrapping="Wrap" />
+                                            <!--  Author  -->
+                                            <TextBlock
+                                                Grid.Row="1"
+                                                Margin="0,4,0,0"
+                                                FontSize="12.5"
+                                                Opacity="0.55"
+                                                Text="{Binding Author}"
+                                                TextTrimming="CharacterEllipsis"
+                                                TextWrapping="NoWrap" />
+                                        </Grid>
+                                    </Grid>
                                 </suki:GlassCard>
 
                             </DataTemplate>
-
                         </ItemsControl.ItemTemplate>
 
                     </ItemsControl>

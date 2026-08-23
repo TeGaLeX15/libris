@@ -8,11 +8,11 @@
     xmlns:suki="clr-namespace:SukiUI.Controls;assembly=SukiUI"
     xmlns:views="using:Libris.Views"
     xmlns:vm="using:Libris.ViewModels"
-    Title="Libris"
-    Width="1245"
+    Width="1120"
     Height="800"
     MinWidth="870"
     MinHeight="700"
+    Title=""
     d:DesignHeight="800"
     d:DesignWidth="1200"
     x:DataType="vm:MainViewModel"
@@ -37,7 +37,7 @@
     </suki:SukiWindow.LogoContent>
 
     <!-- Main navigation -->
-    <suki:SukiSideMenu IsSearchEnabled="False">
+    <suki:SukiSideMenu IsSearchEnabled="False" IsMenuExpanded="False">
 
         <suki:SukiSideMenu.Items>
 

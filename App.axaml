@@ -14,5 +14,5 @@
     <Application.Styles>
         <suki:SukiTheme Locale="en-US" ThemeColor="Blue" />
     </Application.Styles>
-
+    
 </Application>

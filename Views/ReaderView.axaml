@@ -1,0 +1,161 @@
+<!--  Views/ReaderView.axaml  -->
+<UserControl
+    x:Class="Libris.Views.ReaderView"
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:suki="clr-namespace:SukiUI.Controls;assembly=SukiUI"
+    xmlns:vm="using:Libris.ViewModels"
+    x:DataType="vm:ReaderViewModel">
+
+    <Grid>
+
+        <Grid RowDefinitions="Auto,*,Auto">
+
+            <!--  Top bar  -->
+            <Border
+                Grid.Row="0"
+                Padding="22,14"
+                Background="{DynamicResource ThemeBackgroundLowBrush}">
+
+                <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="16">
+
+                    <Button
+                        Grid.Column="0"
+                        Padding="13,8"
+                        Classes="Flat Rounded"
+                        Command="{Binding CloseCommand}"
+                        Content="←  Library" />
+
+                    <StackPanel
+                        Grid.Column="1"
+                        HorizontalAlignment="Center"
+                        Spacing="2">
+
+                        <TextBlock
+                            HorizontalAlignment="Center"
+                            FontSize="15"
+                            FontWeight="SemiBold"
+                            Text="{Binding Title}" />
+
+                        <TextBlock
+                            HorizontalAlignment="Center"
+                            FontSize="12"
+                            Opacity="0.5"
+                            Text="{Binding Author}" />
+
+                    </StackPanel>
+
+                    <StackPanel
+                        Grid.Column="2"
+                        Orientation="Horizontal"
+                        Spacing="6">
+
+                        <Button
+                            Width="38"
+                            Height="38"
+                            Padding="0"
+                            Classes="Flat Rounded"
+                            Content="Aa" />
+
+                        <Button
+                            Width="38"
+                            Height="38"
+                            Padding="0"
+                            Classes="Flat Rounded"
+                            Content="⋮" />
+
+                    </StackPanel>
+
+                </Grid>
+
+            </Border>
+
+            <!--  Reading area  -->
+            <ScrollViewer
+                Grid.Row="1"
+                HorizontalScrollBarVisibility="Disabled"
+                VerticalScrollBarVisibility="Auto">
+
+                <Grid
+                    Width="{Binding ReadingWidth}"
+                    MaxWidth="1200"
+                    Margin="30,55"
+                    HorizontalAlignment="Center">
+
+                    <StackPanel Spacing="28">
+
+                        <TextBlock
+                            FontSize="30"
+                            FontWeight="SemiBold"
+                            Text="Chapter One"
+                            TextWrapping="Wrap" />
+
+                        <TextBlock
+                            FontSize="{Binding FontSize}"
+                            LineHeight="{Binding LineHeight}"
+                            Text="{Binding Content}"
+                            TextWrapping="Wrap" />
+
+                    </StackPanel>
+
+                </Grid>
+
+            </ScrollViewer>
+
+            <!--  Bottom bar  -->
+            <Border
+                Grid.Row="2"
+                Padding="22,12"
+                Background="{DynamicResource ThemeBackgroundLowBrush}">
+
+                <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="18">
+
+                    <Button
+                        Grid.Column="0"
+                        Padding="12,7"
+                        Classes="Flat Rounded"
+                        Content="Previous" />
+
+                    <StackPanel
+                        Grid.Column="1"
+                        VerticalAlignment="Center"
+                        Spacing="5">
+
+                        <ProgressBar
+                            Height="4"
+                            Maximum="100"
+                            Minimum="0"
+                            Value="{Binding Progress}" />
+
+                        <Grid ColumnDefinitions="*,Auto">
+
+                            <TextBlock
+                                FontSize="11"
+                                Opacity="0.45"
+                                Text="{Binding ProgressText}" />
+
+                            <TextBlock
+                                Grid.Column="1"
+                                FontSize="11"
+                                Opacity="0.45"
+                                Text="{Binding PositionText}" />
+
+                        </Grid>
+
+                    </StackPanel>
+
+                    <Button
+                        Grid.Column="2"
+                        Padding="12,7"
+                        Classes="Flat Rounded"
+                        Content="Next" />
+
+                </Grid>
+
+            </Border>
+
+        </Grid>
+
+    </Grid>
+
+</UserControl>

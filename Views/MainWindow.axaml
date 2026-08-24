@@ -8,11 +8,11 @@
     xmlns:suki="clr-namespace:SukiUI.Controls;assembly=SukiUI"
     xmlns:views="using:Libris.Views"
     xmlns:vm="using:Libris.ViewModels"
+    Title=""
     Width="1120"
     Height="800"
     MinWidth="870"
     MinHeight="700"
-    Title=""
     d:DesignHeight="800"
     d:DesignWidth="1200"
     x:DataType="vm:MainViewModel"
@@ -21,7 +21,6 @@
     Icon="/Assets/avalonia-logo.ico"
     mc:Ignorable="d">
 
-    <!-- Application logo -->
     <suki:SukiWindow.LogoContent>
         <StackPanel
             VerticalAlignment="Center"
@@ -33,61 +32,118 @@
                 FontSize="18"
                 FontWeight="SemiBold"
                 Text="Libris" />
+
         </StackPanel>
     </suki:SukiWindow.LogoContent>
 
-    <!-- Main navigation -->
-    <suki:SukiSideMenu IsSearchEnabled="False" IsMenuExpanded="False">
 
-        <suki:SukiSideMenu.Items>
+    <Grid>
 
-            <!-- Library -->
-            <suki:SukiSideMenuItem
-                Classes="Compact"
-                Header="Library">
+        <!--  =========================================================  -->
+        <!--  MAIN APPLICATION  -->
+        <!--  =========================================================  -->
 
-                <suki:SukiSideMenuItem.Icon>
-                    <PathIcon Data="M19,2H5C3.9,2 3,2.9 3,4V20C3,21.1 3.9,22 5,22H19C20.1,22 21,21.1 21,20V4C21,2.9 20.1,2 19,2M19,20H5V4H19V20M7,6H17V8H7V6M7,10H17V12H7V10M7,14H14V16H7V14Z" />
-                </suki:SukiSideMenuItem.Icon>
+        <suki:SukiSideMenu IsMenuExpanded="False" IsSearchEnabled="False">
 
-                <suki:SukiSideMenuItem.PageContent>
-                    <views:LibraryView DataContext="{Binding Library}" />
-                </suki:SukiSideMenuItem.PageContent>
+            <suki:SukiSideMenu.Items>
 
-            </suki:SukiSideMenuItem>
+                <!--  Library  -->
 
-            <!-- Collections -->
-            <suki:SukiSideMenuItem
-                Classes="Compact"
-                Header="Collections">
+                <suki:SukiSideMenuItem Classes="Compact" Header="Library">
 
-                <suki:SukiSideMenuItem.Icon>
-                    <PathIcon Data="M4,4H10V10H4V4M14,4H20V10H14V4M4,14H10V20H4V14M14,14H20V20H14V14Z" />
-                </suki:SukiSideMenuItem.Icon>
+                    <suki:SukiSideMenuItem.Icon>
+                        <PathIcon Data="M19,2H5C3.9,2 3,2.9 3,4V20C3,21.1 3.9,22 5,22H19C20.1,22 21,21.1 21,20V4C21,2.9 20.1,2 19,2M19,20H5V4H19V20M7,6H17V8H7V6M7,10H17V12H7V10M7,14H14V16H7V14Z" />
+                    </suki:SukiSideMenuItem.Icon>
 
-                <suki:SukiSideMenuItem.PageContent>
-                    <views:CollectionsView DataContext="{Binding Collections}" />
-                </suki:SukiSideMenuItem.PageContent>
+                    <suki:SukiSideMenuItem.PageContent>
+                        <views:LibraryView DataContext="{Binding Library}" />
+                    </suki:SukiSideMenuItem.PageContent>
 
-            </suki:SukiSideMenuItem>
+                </suki:SukiSideMenuItem>
 
-            <!-- Settings -->
-            <suki:SukiSideMenuItem
-                Classes="Compact"
-                Header="Settings">
 
-                <suki:SukiSideMenuItem.Icon>
-                    <PathIcon Data="M19.43,12.98C19.47,12.66 19.5,12.34 19.43,11.02L21.54,9.37L19.54,5.91L17.05,6.91C16.53,6.56 15.96,6.27 15.35,6.05L15,3.42H11L10.65,6.05C10.04,6.27 9.47,6.56 8.95,6.91L6.46,5.91L4.46,9.37L6.57,11.02C6.53,11.34 6.5,11.66 6.57,12.98L4.46,14.63L6.46,18.09L8.95,17.09C9.47,17.44 10.04,17.73 10.65,17.95L11,20.58H15L15.35,17.95C15.96,17.73 16.53,17.44 17.05,17.09L19.54,18.09L21.54,14.63L19.43,12.98ZM13,15.5C11.07,15.5 9.5,13.93 9.5,12C9.5,10.07 11.07,8.5 13,8.5C14.93,8.5 16.5,10.07 16.5,12C16.5,13.93 14.93,15.5 13,15.5Z" />
-                </suki:SukiSideMenuItem.Icon>
+                <!--  Collections  -->
 
-                <suki:SukiSideMenuItem.PageContent>
-                    <views:SettingsView DataContext="{Binding Settings}" />
-                </suki:SukiSideMenuItem.PageContent>
+                <suki:SukiSideMenuItem Classes="Compact" Header="Collections">
 
-            </suki:SukiSideMenuItem>
+                    <suki:SukiSideMenuItem.Icon>
+                        <PathIcon Data="M4,4H10V10H4V4M14,4H20V10H14V4M4,14H10V20H4V14M14,14H20V20H14V14Z" />
+                    </suki:SukiSideMenuItem.Icon>
 
-        </suki:SukiSideMenu.Items>
+                    <suki:SukiSideMenuItem.PageContent>
+                        <views:CollectionsView DataContext="{Binding Collections}" />
+                    </suki:SukiSideMenuItem.PageContent>
 
-    </suki:SukiSideMenu>
+                </suki:SukiSideMenuItem>
+
+
+                <!--  Settings  -->
+
+                <suki:SukiSideMenuItem Classes="Compact" Header="Settings">
+
+                    <suki:SukiSideMenuItem.Icon>
+                        <PathIcon Data="M19.43,12.98C19.47,12.66 19.5,12.34 19.43,11.02L21.54,9.37L19.54,5.91L17.05,6.91C16.53,6.56 15.96,6.27 15.35,6.05L15,3.42H11L10.65,6.05C10.04,6.27 9.47,6.56 8.95,6.91L6.46,5.91L4.46,9.37L6.57,11.02C6.53,11.34 6.5,11.66 6.57,12.98L4.46,14.63L6.46,18.09L8.95,17.09C9.47,17.44 10.04,17.73 10.65,17.95L11,20.58H15L15.35,17.95C15.96,17.73 16.53,17.44 17.05,17.09L19.54,18.09L21.54,14.63L19.43,12.98ZM13,15.5C11.07,15.5 9.5,13.93 9.5,12C9.5,10.07 11.07,8.5 13,8.5C14.93,8.5 16.5,10.07 16.5,12C16.5,13.93 14.93,15.5 13,15.5Z" />
+                    </suki:SukiSideMenuItem.Icon>
+
+                    <suki:SukiSideMenuItem.PageContent>
+                        <views:SettingsView DataContext="{Binding Settings}" />
+                    </suki:SukiSideMenuItem.PageContent>
+
+                </suki:SukiSideMenuItem>
+
+            </suki:SukiSideMenu.Items>
+
+        </suki:SukiSideMenu>
+
+
+        <!--  =========================================================  -->
+        <!--  BOOK DETAILS BACKDROP  -->
+        <!--  =========================================================  -->
+
+        <Grid IsVisible="{Binding IsBookDetailsOpen}" ZIndex="100">
+            <Border Background="#99000000" PointerPressed="DetailsBackdrop_PointerPressed" />
+        </Grid>
+
+        <!-- ========================================================= -->
+        <!-- BOOK DETAILS PANEL -->
+        <!-- ========================================================= -->
+        <suki:GlassCard
+            Width="420"
+            Padding="0"
+            HorizontalAlignment="Right"
+            VerticalAlignment="Stretch"
+            Background="{DynamicResource ThemeBackgroundMediumBrush}"
+            IsOpaque="True"
+            IsAnimated="False"
+            IsInteractive="False"
+            IsVisible="{Binding IsBookDetailsOpen}"
+            ZIndex="200"
+            CornerRadius="0"
+            BorderThickness="0"
+            BorderBrush="Transparent">
+
+            <suki:GlassCard.RenderTransform>
+                <TranslateTransform X="{Binding DetailsPanelOffset}" />
+            </suki:GlassCard.RenderTransform>
+
+            <views:BookDetailsView
+                DataContext="{Binding BookDetails}" />
+
+        </suki:GlassCard>
+
+        <!--  =========================================================  -->
+        <!--  READER  -->
+        <!--  =========================================================  -->
+
+        <Panel
+            Background="{DynamicResource ThemeBackgroundLowBrush}"
+            IsVisible="{Binding IsReaderOpen}"
+            ZIndex="300">
+
+            <views:ReaderView DataContext="{Binding Reader}" />
+
+        </Panel>
+
+    </Grid>
 
 </suki:SukiWindow>

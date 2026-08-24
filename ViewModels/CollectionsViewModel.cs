@@ -20,6 +20,8 @@ public partial class CollectionsViewModel : ViewModelBase
     public ObservableCollection<Book> AvailableBooks { get; } = [];
     public ObservableCollection<Book> FilteredAvailableBooks { get; } = [];
 
+    public event EventHandler<Book>? BookSelected;
+
     [ObservableProperty]
     private BookCollection? selectedCollection;
 
@@ -61,7 +63,6 @@ public partial class CollectionsViewModel : ViewModelBase
     partial void OnSelectedCollectionChanged(BookCollection? value)
     {
         RenameCollectionName = value?.Name ?? string.Empty;
-
         IsRenaming = false;
         IsAddBooksOpen = false;
         BookSearchQuery = string.Empty;
@@ -92,6 +93,7 @@ public partial class CollectionsViewModel : ViewModelBase
         }
 
         IsEmpty = Collections.Count == 0;
+
         SelectedCollection = Collections.FirstOrDefault();
 
         RefreshState();
@@ -180,6 +182,15 @@ public partial class CollectionsViewModel : ViewModelBase
     {
         OnPropertyChanged(nameof(HasCollectionBooks));
         OnPropertyChanged(nameof(HasAvailableBooks));
+    }
+
+    [RelayCommand]
+    private void SelectBook(Book? book)
+    {
+        if (book is null)
+            return;
+
+        BookSelected?.Invoke(this, book);
     }
 
     [RelayCommand]

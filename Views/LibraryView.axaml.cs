@@ -1,8 +1,10 @@
 // Views/LibraryView.axaml.cs
 using System.Linq;
 using Avalonia.Controls;
+using Avalonia.Input;
 using Avalonia.Interactivity;
 using Avalonia.Platform.Storage;
+using Libris.Models;
 using Libris.ViewModels;
 
 namespace Libris.Views;
@@ -12,6 +14,22 @@ public partial class LibraryView : UserControl
     public LibraryView()
     {
         InitializeComponent();
+    }
+
+    private void BookCard_PointerPressed(
+        object? sender,
+        PointerPressedEventArgs e)
+    {
+        if (sender is not Control control)
+            return;
+
+        if (control.DataContext is not Book book)
+            return;
+
+        if (DataContext is not LibraryViewModel viewModel)
+            return;
+
+        viewModel.SelectBook(book);
     }
 
     private async void AddBooks_Click(
@@ -31,9 +49,7 @@ public partial class LibraryView : UserControl
                 new FilePickerOpenOptions
                 {
                     Title = "Add books",
-
                     AllowMultiple = true,
-
                     FileTypeFilter =
                     [
                         new FilePickerFileType("Books")

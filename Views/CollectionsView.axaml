@@ -240,19 +240,13 @@
 
                     <Grid RowDefinitions="Auto,*" RowSpacing="12">
 
-                        <!--  Search header  -->
-                        <Grid
+                        <!--  Search  -->
+                        <TextBox
                             Grid.Row="0"
-                            ColumnDefinitions="*,Auto"
-                            ColumnSpacing="8">
-
-                            <TextBox
-                                Grid.Column="0"
-                                Padding="11,8"
-                                CornerRadius="8"
-                                PlaceholderText="Search by title or author..."
-                                Text="{Binding BookSearchQuery, Mode=TwoWay}" />
-                        </Grid>
+                            Padding="11,8"
+                            CornerRadius="8"
+                            PlaceholderText="Search by title or author..."
+                            Text="{Binding BookSearchQuery, Mode=TwoWay}" />
 
                         <!--  Available books  -->
                         <Grid Grid.Row="1">
@@ -305,7 +299,6 @@
                                 </ItemsControl>
                             </ScrollViewer>
 
-                            <!--  No books in library  -->
                             <StackPanel
                                 HorizontalAlignment="Center"
                                 VerticalAlignment="Center"
@@ -324,14 +317,6 @@
                                     Opacity="0.5"
                                     Text="All books from your library are already here." />
                             </StackPanel>
-
-                            <!--  Search returned nothing  -->
-                            <StackPanel
-                                HorizontalAlignment="Center"
-                                VerticalAlignment="Center"
-                                IsVisible="{Binding HasAvailableBooks, Converter={x:Static BoolConverters.Not}}"
-                                Spacing="4" />
-
                         </Grid>
                     </Grid>
                 </suki:GlassCard>
@@ -344,7 +329,7 @@
 
                     <Grid Margin="2">
 
-                        <!--  Collection has books  -->
+                        <!--  Books  -->
                         <ItemsControl IsVisible="{Binding HasCollectionBooks}" ItemsSource="{Binding CollectionBooks}">
 
                             <ItemsControl.ItemsPanel>
@@ -371,14 +356,21 @@
 
                                         <Grid RowDefinitions="218,*">
 
-                                            <!--  Cover  -->
-                                            <Border
+                                            <!--  Clickable book content  -->
+                                            <Button
                                                 Grid.Row="0"
-                                                ClipToBounds="True"
-                                                CornerRadius="10,10,0,0">
+                                                Padding="0"
+                                                Background="Transparent"
+                                                BorderThickness="0"
+                                                Command="{Binding $parent[ItemsControl].DataContext.SelectBookCommand}"
+                                                CommandParameter="{Binding}">
 
-                                                <Image Source="{Binding CoverPath, Converter={StaticResource BookCoverConverter}}" Stretch="UniformToFill" />
-                                            </Border>
+                                                <Border ClipToBounds="True" CornerRadius="10,10,0,0">
+
+                                                    <Image Source="{Binding CoverPath, Converter={StaticResource BookCoverConverter}}" Stretch="UniformToFill" />
+                                                </Border>
+
+                                            </Button>
 
                                             <!--  Info  -->
                                             <Grid
@@ -387,21 +379,33 @@
                                                 RowDefinitions="*,Auto"
                                                 RowSpacing="6">
 
-                                                <StackPanel Grid.Row="0" Spacing="3">
+                                                <Button
+                                                    Grid.Row="0"
+                                                    Padding="0"
+                                                    HorizontalContentAlignment="Left"
+                                                    VerticalContentAlignment="Top"
+                                                    Background="Transparent"
+                                                    BorderThickness="0"
+                                                    Command="{Binding $parent[ItemsControl].DataContext.SelectBookCommand}"
+                                                    CommandParameter="{Binding}">
 
-                                                    <TextBlock
-                                                        FontSize="13.5"
-                                                        FontWeight="SemiBold"
-                                                        MaxLines="2"
-                                                        Text="{Binding Title}"
-                                                        TextWrapping="Wrap" />
+                                                    <StackPanel Spacing="3">
 
-                                                    <TextBlock
-                                                        FontSize="12"
-                                                        Opacity="0.5"
-                                                        Text="{Binding Author}"
-                                                        TextTrimming="CharacterEllipsis" />
-                                                </StackPanel>
+                                                        <TextBlock
+                                                            FontSize="13.5"
+                                                            FontWeight="SemiBold"
+                                                            MaxLines="2"
+                                                            Text="{Binding Title}"
+                                                            TextWrapping="Wrap" />
+
+                                                        <TextBlock
+                                                            FontSize="12"
+                                                            Opacity="0.5"
+                                                            Text="{Binding Author}"
+                                                            TextTrimming="CharacterEllipsis" />
+
+                                                    </StackPanel>
+                                                </Button>
 
                                                 <Button
                                                     Grid.Row="1"
@@ -410,12 +414,15 @@
                                                     Command="{Binding $parent[ItemsControl].DataContext.RemoveBookCommand}"
                                                     CommandParameter="{Binding}"
                                                     Content="Remove" />
+
                                             </Grid>
                                         </Grid>
+
                                     </suki:GlassCard>
 
                                 </DataTemplate>
                             </ItemsControl.ItemTemplate>
+
                         </ItemsControl>
 
                         <!--  Empty collection  -->
@@ -448,6 +455,7 @@
 
                     </Grid>
                 </ScrollViewer>
+
             </Grid>
         </Grid>
     </Grid>

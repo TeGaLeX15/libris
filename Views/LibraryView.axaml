@@ -17,22 +17,20 @@
     </UserControl.Resources>
 
     <Grid>
-        <ScrollViewer
-            HorizontalScrollBarVisibility="Disabled"
-            VerticalScrollBarVisibility="Auto">
+        <ScrollViewer HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto">
 
-            <Grid
-                Margin="28,24,28,32"
-                RowDefinitions="Auto,*">
+            <Grid Margin="28,24,28,32" RowDefinitions="Auto,*">
 
-                <!-- Header -->
+                <!--  Header  -->
+
                 <Grid
                     Grid.Row="0"
                     Margin="0,0,0,28"
                     ColumnDefinitions="Auto,*,Auto,Auto"
                     ColumnSpacing="12">
 
-                    <!-- Title -->
+                    <!--  Title  -->
+
                     <StackPanel
                         Grid.Column="0"
                         VerticalAlignment="Center"
@@ -50,7 +48,8 @@
 
                     </StackPanel>
 
-                    <!-- Search -->
+                    <!--  Search  -->
+
                     <Border
                         Grid.Column="1"
                         MinWidth="220"
@@ -73,7 +72,8 @@
 
                     </Border>
 
-                    <!-- Sort -->
+                    <!--  Sort  -->
+
                     <ComboBox
                         Grid.Column="2"
                         Width="145"
@@ -81,7 +81,8 @@
                         ItemsSource="{Binding SortOptions}"
                         SelectedItem="{Binding SelectedSort, Mode=TwoWay}" />
 
-                    <!-- Add books -->
+                    <!--  Add books  -->
+
                     <Button
                         Grid.Column="3"
                         Padding="20,10"
@@ -91,10 +92,12 @@
 
                 </Grid>
 
-                <!-- Content -->
+                <!--  Content  -->
+
                 <Grid Grid.Row="1">
 
-                    <!-- Empty library -->
+                    <!--  Empty library  -->
+
                     <StackPanel
                         MaxWidth="420"
                         HorizontalAlignment="Center"
@@ -123,7 +126,8 @@
 
                     </StackPanel>
 
-                    <!-- Search returned nothing -->
+                    <!--  Search returned nothing  -->
+
                     <StackPanel
                         MaxWidth="420"
                         HorizontalAlignment="Center"
@@ -145,7 +149,8 @@
 
                     </StackPanel>
 
-                    <!-- Books -->
+                    <!--  Books  -->
+
                     <ItemsControl
                         HorizontalAlignment="Stretch"
                         IsVisible="{Binding !IsEmpty}"
@@ -165,6 +170,7 @@
                         </ItemsControl.ItemsPanel>
 
                         <ItemsControl.ItemTemplate>
+
                             <DataTemplate>
 
                                 <suki:GlassCard
@@ -173,11 +179,11 @@
                                     Padding="0"
                                     HorizontalAlignment="Left"
                                     IsAnimated="True"
-                                    IsInteractive="True">
+                                    IsInteractive="True"
+                                    PointerPressed="BookCard_PointerPressed">
 
                                     <Grid RowDefinitions="226,*">
 
-                                        <!-- Cover -->
                                         <Border
                                             Grid.Row="0"
                                             Height="226"
@@ -186,19 +192,15 @@
                                             ClipToBounds="True"
                                             CornerRadius="10,10,0,0">
 
-                                            <Image
-                                                Source="{Binding CoverPath, Converter={StaticResource BookCoverConverter}}"
-                                                Stretch="UniformToFill" />
+                                            <Image Source="{Binding CoverPath, Converter={StaticResource BookCoverConverter}}" Stretch="UniformToFill" />
 
                                         </Border>
 
-                                        <!-- Information -->
                                         <Grid
                                             Grid.Row="1"
                                             Margin="12,10,12,11"
                                             RowDefinitions="Auto,Auto,*">
 
-                                            <!-- Title -->
                                             <TextBlock
                                                 Grid.Row="0"
                                                 FontSize="14"
@@ -208,7 +210,6 @@
                                                 Text="{Binding Title}"
                                                 TextWrapping="Wrap" />
 
-                                            <!-- Author -->
                                             <TextBlock
                                                 Grid.Row="1"
                                                 Margin="0,4,0,0"
@@ -225,6 +226,7 @@
                                 </suki:GlassCard>
 
                             </DataTemplate>
+
                         </ItemsControl.ItemTemplate>
 
                     </ItemsControl>
@@ -234,6 +236,7 @@
             </Grid>
 
         </ScrollViewer>
+
     </Grid>
 
 </UserControl>

@@ -1,0 +1,274 @@
+<!--  Views/BookDetailsView.axaml  -->
+<UserControl
+    x:Class="Libris.Views.BookDetailsView"
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:converters="using:Libris.Converters"
+    xmlns:suki="clr-namespace:SukiUI.Controls;assembly=SukiUI"
+    xmlns:vm="using:Libris.ViewModels"
+    x:DataType="vm:BookDetailsViewModel">
+
+    <UserControl.Resources>
+        <converters:BookCoverConverter x:Key="BookCoverConverter" />
+    </UserControl.Resources>
+
+    <UserControl.Styles>
+        <Style Selector="Button.remove-button">
+            <Setter Property="Background" Value="#D32F2F" />
+        </Style>
+
+        <Style Selector="Button.remove-button:pointerover">
+            <Setter Property="Background" Value="#B71C1C" />
+        </Style>
+    </UserControl.Styles>
+
+
+    <Grid RowDefinitions="Auto,*">
+
+        <!--  =========================================================  -->
+        <!--  HEADER  -->
+        <!--  =========================================================  -->
+
+        <Grid
+            Grid.Row="0"
+            Margin="22,18,18,12"
+            ColumnDefinitions="*,Auto">
+
+            <TextBlock
+                Grid.Column="0"
+                VerticalAlignment="Center"
+                FontSize="20"
+                FontWeight="SemiBold"
+                Text="Book Details" />
+
+            <Button
+                Grid.Column="1"
+                Width="36"
+                Height="36"
+                Padding="0"
+                Classes="Flat Rounded"
+                Command="{Binding CloseCommand}"
+                Content="×"
+                FontSize="22" />
+
+        </Grid>
+
+
+        <!--  =========================================================  -->
+        <!--  CONTENT  -->
+        <!--  =========================================================  -->
+
+        <ScrollViewer
+            Grid.Row="1"
+            HorizontalScrollBarVisibility="Disabled"
+            VerticalScrollBarVisibility="Auto">
+
+            <StackPanel Margin="22,4,22,28" Spacing="22">
+
+
+                <!--  =================================================  -->
+                <!--  COVER  -->
+                <!--  =================================================  -->
+
+                <Border
+                    Width="220"
+                    Height="320"
+                    HorizontalAlignment="Center"
+                    ClipToBounds="True"
+                    CornerRadius="12">
+
+                    <Image Source="{Binding Book.CoverPath, Converter={StaticResource BookCoverConverter}}" Stretch="UniformToFill" />
+
+                </Border>
+
+
+                <!--  =================================================  -->
+                <!--  TITLE  -->
+                <!--  =================================================  -->
+
+                <StackPanel Spacing="5">
+
+                    <TextBlock
+                        FontSize="24"
+                        FontWeight="SemiBold"
+                        Text="{Binding Title}"
+                        TextWrapping="Wrap" />
+
+                    <TextBlock
+                        FontSize="15"
+                        Opacity="0.55"
+                        Text="{Binding Author}"
+                        TextWrapping="Wrap" />
+
+                </StackPanel>
+
+
+                <!--  =================================================  -->
+                <!--  PRIMARY ACTIONS  -->
+                <!--  =================================================  -->
+
+                <Grid ColumnDefinitions="*,*" ColumnSpacing="10">
+
+                    <Button
+                        Grid.Column="0"
+                        Padding="16,11"
+                        Background="{DynamicResource SystemAccentColor}"
+                        Classes="Flat Rounded"
+                        Command="{Binding ReadCommand}"
+                        Content="Read"
+                        FontSize="14"
+                        FontWeight="SemiBold" />
+
+                    <Button
+                        Grid.Column="1"
+                        Padding="16,11"
+                        Classes="Outlined Rounded"
+                        Content="Add to collection"
+                        FontSize="14" />
+
+                </Grid>
+
+
+                <!--  =================================================  -->
+                <!--  INFORMATION  -->
+                <!--  =================================================  -->
+
+                <StackPanel Spacing="10">
+
+                    <TextBlock
+                        FontSize="17"
+                        FontWeight="SemiBold"
+                        Text="Information" />
+
+                    <suki:GlassCard
+                        Padding="15"
+                        IsAnimated="True"
+                        IsOpaque="True">
+
+                        <StackPanel Spacing="13">
+
+                            <Grid ColumnDefinitions="*,Auto">
+
+                                <TextBlock Opacity="0.55" Text="Format" />
+
+                                <TextBlock
+                                    Grid.Column="1"
+                                    FontWeight="SemiBold"
+                                    Text="{Binding Format}" />
+
+                            </Grid>
+
+
+                            <Grid ColumnDefinitions="*,Auto">
+
+                                <TextBlock Opacity="0.55" Text="File size" />
+
+                                <TextBlock
+                                    Grid.Column="1"
+                                    FontWeight="SemiBold"
+                                    Text="{Binding FileSize}" />
+
+                            </Grid>
+
+
+                            <Grid ColumnDefinitions="*,Auto">
+
+                                <TextBlock Opacity="0.55" Text="File" />
+
+                                <TextBlock
+                                    Grid.Column="1"
+                                    MaxWidth="180"
+                                    FontWeight="SemiBold"
+                                    Text="{Binding FileName}"
+                                    TextTrimming="CharacterEllipsis" />
+
+                            </Grid>
+
+                        </StackPanel>
+
+                    </suki:GlassCard>
+
+                </StackPanel>
+
+
+                <!--  =================================================  -->
+                <!--  READING  -->
+                <!--  =================================================  -->
+
+                <StackPanel Spacing="10">
+
+                    <TextBlock
+                        FontSize="17"
+                        FontWeight="SemiBold"
+                        Text="Reading" />
+
+                    <suki:GlassCard
+                        Padding="15"
+                        IsAnimated="True"
+                        IsOpaque="True">
+
+                        <StackPanel Spacing="12">
+
+                            <Grid ColumnDefinitions="*,Auto">
+
+                                <TextBlock Opacity="0.55" Text="Progress" />
+
+                                <TextBlock
+                                    Grid.Column="1"
+                                    FontWeight="SemiBold"
+                                    Text="Not started" />
+
+                            </Grid>
+
+
+                            <ProgressBar
+                                Height="6"
+                                Maximum="100"
+                                Minimum="0"
+                                Value="0" />
+
+
+                            <TextBlock
+                                FontSize="12"
+                                Opacity="0.45"
+                                Text="Start reading to track your progress." />
+
+                        </StackPanel>
+
+                    </suki:GlassCard>
+
+                </StackPanel>
+
+
+                <!--  =================================================  -->
+                <!--  MORE ACTIONS  -->
+                <!--  =================================================  -->
+
+                <StackPanel Spacing="8">
+
+                    <TextBlock
+                        FontSize="17"
+                        FontWeight="SemiBold"
+                        Text="Actions" />
+
+                    <Button
+                        Padding="14,10"
+                        HorizontalContentAlignment="Left"
+                        Classes="Flat Rounded"
+                        Content="Open file location" />
+
+                    <Button
+                        Padding="14,10"
+                        HorizontalContentAlignment="Left"
+                        Classes="Flat Rounded remove-button"
+                        Content="Remove from library" />
+
+                </StackPanel>
+
+            </StackPanel>
+
+        </ScrollViewer>
+
+    </Grid>
+
+</UserControl>

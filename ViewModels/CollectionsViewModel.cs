@@ -24,9 +24,6 @@ public partial class CollectionsViewModel : ViewModelBase
     private BookCollection? selectedCollection;
 
     [ObservableProperty]
-    private Book? selectedAvailableBook;
-
-    [ObservableProperty]
     private string newCollectionName = string.Empty;
 
     [ObservableProperty]
@@ -41,6 +38,18 @@ public partial class CollectionsViewModel : ViewModelBase
     [ObservableProperty]
     private bool isAddBooksOpen;
 
+    [ObservableProperty]
+    private bool isRenaming;
+
+    public bool HasCollectionBooks =>
+        CollectionBooks.Count > 0;
+
+    public bool HasAvailableBooks =>
+        FilteredAvailableBooks.Count > 0;
+
+    public string AddBooksButtonText =>
+        IsAddBooksOpen ? "Close" : "Add books";
+
     public CollectionsViewModel()
     {
         _collectionService = new CollectionService();
@@ -53,16 +62,24 @@ public partial class CollectionsViewModel : ViewModelBase
     {
         RenameCollectionName = value?.Name ?? string.Empty;
 
+        IsRenaming = false;
+        IsAddBooksOpen = false;
+        BookSearchQuery = string.Empty;
+
         RefreshCollectionBooks();
         RefreshAvailableBooks();
 
-        SelectedAvailableBook = null;
-        IsAddBooksOpen = false;
+        OnPropertyChanged(nameof(AddBooksButtonText));
     }
 
     partial void OnBookSearchQueryChanged(string value)
     {
         ApplyBookFilter();
+    }
+
+    partial void OnIsAddBooksOpenChanged(bool value)
+    {
+        OnPropertyChanged(nameof(AddBooksButtonText));
     }
 
     private void LoadCollections()
@@ -76,6 +93,8 @@ public partial class CollectionsViewModel : ViewModelBase
 
         IsEmpty = Collections.Count == 0;
         SelectedCollection = Collections.FirstOrDefault();
+
+        RefreshState();
     }
 
     private void RefreshCollectionBooks()
@@ -83,7 +102,10 @@ public partial class CollectionsViewModel : ViewModelBase
         CollectionBooks.Clear();
 
         if (SelectedCollection is null)
+        {
+            RefreshState();
             return;
+        }
 
         var books = _libraryService.Load();
 
@@ -96,6 +118,8 @@ public partial class CollectionsViewModel : ViewModelBase
                 CollectionBooks.Add(book);
             }
         }
+
+        RefreshState();
     }
 
     private void RefreshAvailableBooks()
@@ -105,6 +129,7 @@ public partial class CollectionsViewModel : ViewModelBase
         if (SelectedCollection is null)
         {
             FilteredAvailableBooks.Clear();
+            RefreshState();
             return;
         }
 
@@ -147,20 +172,55 @@ public partial class CollectionsViewModel : ViewModelBase
         {
             FilteredAvailableBooks.Add(book);
         }
+
+        RefreshState();
+    }
+
+    private void RefreshState()
+    {
+        OnPropertyChanged(nameof(HasCollectionBooks));
+        OnPropertyChanged(nameof(HasAvailableBooks));
     }
 
     [RelayCommand]
     private void ToggleAddBooks()
     {
+        if (SelectedCollection is null)
+            return;
+
         IsAddBooksOpen = !IsAddBooksOpen;
 
         if (IsAddBooksOpen)
         {
             BookSearchQuery = string.Empty;
-            SelectedAvailableBook = null;
-
             RefreshAvailableBooks();
         }
+    }
+
+    [RelayCommand]
+    private void CloseAddBooks()
+    {
+        IsAddBooksOpen = false;
+        BookSearchQuery = string.Empty;
+    }
+
+    [RelayCommand]
+    private void StartRename()
+    {
+        if (SelectedCollection is null)
+            return;
+
+        RenameCollectionName = SelectedCollection.Name;
+        IsRenaming = true;
+    }
+
+    [RelayCommand]
+    private void CancelRename()
+    {
+        RenameCollectionName =
+            SelectedCollection?.Name ?? string.Empty;
+
+        IsRenaming = false;
     }
 
     [RelayCommand]
@@ -171,14 +231,14 @@ public partial class CollectionsViewModel : ViewModelBase
         if (string.IsNullOrWhiteSpace(name))
             return;
 
-        if (Collections.Any(x =>
-                string.Equals(
-                    x.Name,
-                    name,
-                    StringComparison.OrdinalIgnoreCase)))
-        {
+        var alreadyExists = Collections.Any(x =>
+            string.Equals(
+                x.Name,
+                name,
+                StringComparison.OrdinalIgnoreCase));
+
+        if (alreadyExists)
             return;
-        }
 
         var collection = _collectionService.Create(name);
 
@@ -189,6 +249,7 @@ public partial class CollectionsViewModel : ViewModelBase
 
         NewCollectionName = string.Empty;
         IsEmpty = false;
+
         SelectedCollection = collection;
     }
 
@@ -203,21 +264,24 @@ public partial class CollectionsViewModel : ViewModelBase
         if (string.IsNullOrWhiteSpace(name))
             return;
 
-        if (Collections.Any(x =>
-                x.Id != SelectedCollection.Id &&
-                string.Equals(
-                    x.Name,
-                    name,
-                    StringComparison.OrdinalIgnoreCase)))
-        {
+        var alreadyExists = Collections.Any(x =>
+            x.Id != SelectedCollection.Id &&
+            string.Equals(
+                x.Name,
+                name,
+                StringComparison.OrdinalIgnoreCase));
+
+        if (alreadyExists)
             return;
-        }
 
         SelectedCollection.Name = name;
 
-        _collectionService.Update(SelectedCollection);
+        _collectionService.Update(
+            SelectedCollection);
 
         OnPropertyChanged(nameof(SelectedCollection));
+
+        IsRenaming = false;
     }
 
     [RelayCommand]
@@ -233,20 +297,17 @@ public partial class CollectionsViewModel : ViewModelBase
         Collections.Remove(collection);
 
         IsEmpty = Collections.Count == 0;
-        SelectedCollection = Collections.FirstOrDefault();
+
+        SelectedCollection =
+            Collections.FirstOrDefault();
+
+        IsAddBooksOpen = false;
+        IsRenaming = false;
+
+        RefreshState();
     }
 
     [RelayCommand]
-    private void AddSelectedBook()
-    {
-        if (SelectedAvailableBook is null)
-            return;
-
-        AddBook(SelectedAvailableBook);
-
-        SelectedAvailableBook = null;
-    }
-
     private void AddBook(Book? book)
     {
         if (book is null || SelectedCollection is null)
@@ -257,7 +318,8 @@ public partial class CollectionsViewModel : ViewModelBase
 
         SelectedCollection.BookIds.Add(book.Id);
 
-        _collectionService.Update(SelectedCollection);
+        _collectionService.Update(
+            SelectedCollection);
 
         RefreshCollectionBooks();
         RefreshAvailableBooks();
@@ -269,9 +331,11 @@ public partial class CollectionsViewModel : ViewModelBase
         if (book is null || SelectedCollection is null)
             return;
 
-        SelectedCollection.BookIds.Remove(book.Id);
+        if (!SelectedCollection.BookIds.Remove(book.Id))
+            return;
 
-        _collectionService.Update(SelectedCollection);
+        _collectionService.Update(
+            SelectedCollection);
 
         RefreshCollectionBooks();
         RefreshAvailableBooks();

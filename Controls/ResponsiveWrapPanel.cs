@@ -1,5 +1,6 @@
 // Controls/ResponsiveWrapPanel.cs
 using System;
+
 using Avalonia;
 using Avalonia.Controls;
 
@@ -53,16 +54,14 @@ public class ResponsiveWrapPanel : Panel
 
     protected override Size MeasureOverride(Size availableSize)
     {
-        var availableWidth = availableSize.Width;
+        var width = availableSize.Width;
 
-        if (double.IsInfinity(availableWidth) || availableWidth <= 0)
-            availableWidth = ItemWidth;
+        if (double.IsInfinity(width) || width <= 0)
+        {
+            width = ItemWidth;
+        }
 
-        var columns = CalculateColumns(availableWidth);
-
-        var totalWidth =
-            columns * ItemWidth +
-            (columns - 1) * HorizontalSpacing;
+        var columns = CalculateColumns(width);
 
         foreach (var child in Children)
         {
@@ -77,22 +76,22 @@ public class ResponsiveWrapPanel : Panel
             : (int)Math.Ceiling(
                 (double)Children.Count / columns);
 
-        var totalHeight =
+        var desiredWidth =
+            columns * ItemWidth +
+            Math.Max(0, columns - 1) * HorizontalSpacing;
+
+        var desiredHeight =
             rows * ItemHeight +
             Math.Max(0, rows - 1) * VerticalSpacing;
 
         return new Size(
-            Math.Min(availableWidth, totalWidth),
-            totalHeight);
+            Math.Min(width, desiredWidth),
+            desiredHeight);
     }
 
     protected override Size ArrangeOverride(Size finalSize)
     {
         var columns = CalculateColumns(finalSize.Width);
-
-        var totalWidth =
-            columns * ItemWidth +
-            (columns - 1) * HorizontalSpacing;
 
         for (var index = 0; index < Children.Count; index++)
         {
@@ -115,13 +114,14 @@ public class ResponsiveWrapPanel : Panel
                     ItemHeight));
         }
 
-        return new Size(
-            Math.Min(finalSize.Width, totalWidth),
-            finalSize.Height);
+        return finalSize;
     }
 
     private int CalculateColumns(double width)
     {
+        if (width <= ItemWidth)
+            return 1;
+
         var columns = (int)(
             (width + HorizontalSpacing) /
             (ItemWidth + HorizontalSpacing));

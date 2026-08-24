@@ -3,396 +3,452 @@
     x:Class="Libris.Views.CollectionsView"
     xmlns="https://github.com/avaloniaui"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:controls="using:Libris.Controls"
     xmlns:converters="using:Libris.Converters"
     xmlns:models="using:Libris.Models"
     xmlns:suki="clr-namespace:SukiUI.Controls;assembly=SukiUI"
     xmlns:vm="using:Libris.ViewModels"
-    x:DataType="vm:CollectionsViewModel"> 
-    
-    <UserControl.Resources> 
-        <converters:BookCoverConverter x:Key="BookCoverConverter" /> 
+    x:DataType="vm:CollectionsViewModel">
+
+    <UserControl.Resources>
+        <converters:BookCoverConverter x:Key="BookCoverConverter" />
     </UserControl.Resources>
 
-    <Grid Margin="28,24,28,32">
+    <Grid
+        Margin="28,24,28,32"
+        RowDefinitions="Auto,*"
+        RowSpacing="24">
 
-        <Grid RowDefinitions="Auto,*">
+        <!--  Page header  -->
+        <Grid
+            Grid.Row="0"
+            ColumnDefinitions="*,Auto"
+            ColumnSpacing="20">
 
-            <!--  Header  -->
+            <StackPanel Spacing="4">
+                <TextBlock
+                    FontSize="32"
+                    FontWeight="SemiBold"
+                    Text="Collections" />
 
+                <TextBlock
+                    FontSize="14"
+                    Opacity="0.55"
+                    Text="Organize your books into personal collections." />
+            </StackPanel>
+
+            <!--  Create  -->
             <Grid
-                Grid.Row="0"
-                Margin="0,0,0,28"
+                Grid.Column="1"
+                VerticalAlignment="Center"
                 ColumnDefinitions="*,Auto"
-                ColumnSpacing="20">
+                ColumnSpacing="8">
 
-                <StackPanel Grid.Column="0" Spacing="5">
+                <TextBox
+                    Grid.Column="0"
+                    Width="210"
+                    Padding="12,9"
+                    CornerRadius="9"
+                    PlaceholderText="New collection..."
+                    Text="{Binding NewCollectionName, Mode=TwoWay}" />
 
-                    <TextBlock
-                        FontSize="32"
-                        FontWeight="SemiBold"
-                        Text="Collections" />
-
-                    <TextBlock
-                        FontSize="14"
-                        Opacity="0.6"
-                        Text="Organize your books into collections." />
-
-                </StackPanel>
-
-                <StackPanel
+                <Button
                     Grid.Column="1"
-                    VerticalAlignment="Center"
-                    Orientation="Horizontal"
-                    Spacing="10">
-
-                    <TextBox
-                        Width="220"
-                        Padding="12,8"
-                        Background="#0DFFFFFF"
-                        BorderBrush="#18FFFFFF"
-                        BorderThickness="1"
-                        CornerRadius="9"
-                        PlaceholderText="Collection name..."
-                        Text="{Binding NewCollectionName, Mode=TwoWay}" />
-
-                    <Button
-                        Padding="18,10"
-                        Command="{Binding CreateCollectionCommand}"
-                        Content="Create" />
-
-                </StackPanel>
-
+                    Padding="16,9"
+                    Classes="Flat Rounded"
+                    Command="{Binding CreateCollectionCommand}"
+                    Content="Create" />
             </Grid>
+        </Grid>
 
-            <!--  Content  -->
+        <!--  Main content  -->
+        <Grid
+            Grid.Row="1"
+            ColumnDefinitions="220,*"
+            ColumnSpacing="22">
 
-            <Grid Grid.Row="1">
+            <!--  Empty state  -->
+            <StackPanel
+                Grid.ColumnSpan="2"
+                HorizontalAlignment="Center"
+                VerticalAlignment="Center"
+                IsVisible="{Binding IsEmpty}"
+                Spacing="8">
 
-                <!--  Empty  -->
-
-                <StackPanel
+                <TextBlock
                     HorizontalAlignment="Center"
-                    VerticalAlignment="Center"
-                    IsVisible="{Binding IsEmpty}"
-                    Spacing="10">
+                    FontSize="25"
+                    FontWeight="SemiBold"
+                    Text="No collections yet" />
 
-                    <TextBlock
-                        HorizontalAlignment="Center"
-                        FontSize="26"
-                        FontWeight="SemiBold"
-                        Text="No collections yet" />
+                <TextBlock
+                    MaxWidth="420"
+                    HorizontalAlignment="Center"
+                    Opacity="0.55"
+                    Text="Create your first collection to organize your books."
+                    TextAlignment="Center" />
+            </StackPanel>
 
-                    <TextBlock
-                        MaxWidth="420"
-                        HorizontalAlignment="Center"
-                        Opacity="0.6"
-                        Text="Create a collection to organize your books."
-                        TextAlignment="Center" />
+            <!--  Sidebar  -->
+            <suki:GlassCard
+                Grid.Column="0"
+                Padding="10"
+                IsAnimated="True"
+                IsVisible="{Binding !IsEmpty}">
 
-                </StackPanel>
+                <Grid RowDefinitions="Auto,*">
 
-                <!--  Collections  -->
+                    <Grid Margin="10,6,10,12" ColumnDefinitions="*,Auto">
 
+                        <TextBlock
+                            FontSize="16"
+                            FontWeight="SemiBold"
+                            Text="Collections" />
+
+                        <TextBlock
+                            Grid.Column="1"
+                            FontSize="12"
+                            Opacity="0.45"
+                            Text="{Binding Collections.Count}" />
+                    </Grid>
+
+                    <ListBox
+                        Grid.Row="1"
+                        Background="Transparent"
+                        BorderThickness="0"
+                        ItemsSource="{Binding Collections}"
+                        SelectedItem="{Binding SelectedCollection, Mode=TwoWay}">
+
+                        <ListBox.ItemTemplate>
+                            <DataTemplate x:DataType="models:BookCollection">
+
+                                <Border
+                                    Margin="0,2"
+                                    Padding="12,10"
+                                    CornerRadius="8">
+
+                                    <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
+
+                                        <TextBlock Text="{Binding Name}" TextTrimming="CharacterEllipsis" />
+
+                                        <TextBlock
+                                            Grid.Column="1"
+                                            FontSize="11"
+                                            Opacity="0.4"
+                                            Text="{Binding BookIds.Count}" />
+                                    </Grid>
+                                </Border>
+
+                            </DataTemplate>
+                        </ListBox.ItemTemplate>
+                    </ListBox>
+                </Grid>
+            </suki:GlassCard>
+
+            <!--  Selected collection  -->
+            <Grid
+                Grid.Column="1"
+                IsVisible="{Binding !IsEmpty}"
+                RowDefinitions="Auto,Auto,*"
+                RowSpacing="18">
+
+                <!--  Collection header  -->
                 <Grid
-                    ColumnDefinitions="220,*"
-                    ColumnSpacing="24"
-                    IsVisible="{Binding !IsEmpty}">
+                    Grid.Row="0"
+                    ColumnDefinitions="*,Auto"
+                    ColumnSpacing="16">
 
-                    <!--  Collection list  -->
-
-                    <suki:GlassCard
+                    <!--  Normal title  -->
+                    <StackPanel
                         Grid.Column="0"
-                        Padding="10"
-                        IsAnimated="True">
+                        IsVisible="{Binding !IsRenaming}"
+                        Spacing="3">
 
-                        <Grid RowDefinitions="Auto,*">
+                        <TextBlock
+                            FontSize="25"
+                            FontWeight="SemiBold"
+                            Text="{Binding SelectedCollection.Name}" />
 
-                            <TextBlock
-                                Margin="10,8,10,14"
-                                FontSize="16"
-                                FontWeight="SemiBold"
-                                Text="Collections" />
+                        <TextBlock
+                            FontSize="13"
+                            Opacity="0.5"
+                            Text="{Binding CollectionBooks.Count, StringFormat='{}{0} books'}" />
+                    </StackPanel>
 
-                            <ListBox
-                                Grid.Row="1"
-                                Background="Transparent"
-                                BorderThickness="0"
-                                ItemsSource="{Binding Collections}"
-                                SelectedItem="{Binding SelectedCollection, Mode=TwoWay}">
-
-                                <ListBox.ItemTemplate>
-
-                                    <DataTemplate x:DataType="models:BookCollection">
-
-                                        <Border
-                                            Margin="0,2"
-                                            Padding="12,10"
-                                            CornerRadius="8">
-
-                                            <TextBlock Text="{Binding Name}" TextTrimming="CharacterEllipsis" />
-
-                                        </Border>
-
-                                    </DataTemplate>
-
-                                </ListBox.ItemTemplate>
-
-                            </ListBox>
-
-                        </Grid>
-
-                    </suki:GlassCard>
-
-                    <!--  Selected collection  -->
-
+                    <!--  Rename editor  -->
                     <Grid
+                        Grid.Column="0"
+                        ColumnDefinitions="*,Auto,Auto"
+                        ColumnSpacing="7"
+                        IsVisible="{Binding IsRenaming}">
+
+                        <TextBox
+                            Grid.Column="0"
+                            Padding="11,8"
+                            CornerRadius="8"
+                            Text="{Binding RenameCollectionName, Mode=TwoWay}" />
+
+                        <Button
+                            Grid.Column="1"
+                            Padding="13,8"
+                            Classes="Flat Rounded"
+                            Command="{Binding RenameCollectionCommand}"
+                            Content="Save" />
+
+                        <Button
+                            Grid.Column="2"
+                            Padding="13,8"
+                            Classes="Flat Rounded"
+                            Command="{Binding CancelRenameCommand}"
+                            Content="Cancel" />
+                    </Grid>
+
+                    <!--  Actions  -->
+                    <StackPanel
                         Grid.Column="1"
-                        RowDefinitions="Auto,Auto,*"
-                        RowSpacing="20">
+                        VerticalAlignment="Center"
+                        IsVisible="{Binding !IsRenaming}"
+                        Orientation="Horizontal"
+                        Spacing="7">
 
-                        <!--  Collection header  -->
+                        <Button
+                            Padding="14,8"
+                            Classes="Outlined Rounded"
+                            Command="{Binding ToggleAddBooksCommand}"
+                            Content="{Binding AddBooksButtonText}" />
 
+                        <Button
+                            Padding="14,8"
+                            Classes="Flat Rounded"
+                            Command="{Binding StartRenameCommand}"
+                            Content="Rename" />
+
+                        <Button
+                            Padding="14,8"
+                            Classes="Flat Rounded"
+                            Command="{Binding DeleteCollectionCommand}"
+                            Content="Delete" />
+                    </StackPanel>
+                </Grid>
+
+                <!--  Add books  -->
+                <suki:GlassCard
+                    Grid.Row="1"
+                    Padding="14"
+                    IsAnimated="True"
+                    IsVisible="{Binding IsAddBooksOpen}">
+
+                    <Grid RowDefinitions="Auto,*" RowSpacing="12">
+
+                        <!--  Search header  -->
                         <Grid
                             Grid.Row="0"
                             ColumnDefinitions="*,Auto"
-                            ColumnSpacing="16">
+                            ColumnSpacing="8">
 
-                            <StackPanel Grid.Column="0" Spacing="5">
-
-                                <TextBlock
-                                    FontSize="26"
-                                    FontWeight="SemiBold"
-                                    Text="{Binding SelectedCollection.Name}" />
-
-                                <TextBlock
-                                    FontSize="13"
-                                    Opacity="0.55"
-                                    Text="{Binding CollectionBooks.Count, StringFormat='{}{0} books'}" />
-
-                            </StackPanel>
-
-                            <StackPanel
-                                Grid.Column="1"
-                                Orientation="Horizontal"
-                                Spacing="8">
-
-                                <Button
-                                    Padding="16,9"
-                                    Command="{Binding ToggleAddBooksCommand}"
-                                    Content="Add books" />
-
-                                <Button
-                                    Padding="16,9"
-                                    Command="{Binding RenameCollectionCommand}"
-                                    Content="Rename" />
-
-                                <Button
-                                    Padding="16,9"
-                                    Command="{Binding DeleteCollectionCommand}"
-                                    Content="Delete" />
-
-                            </StackPanel>
-
+                            <TextBox
+                                Grid.Column="0"
+                                Padding="11,8"
+                                CornerRadius="8"
+                                PlaceholderText="Search by title or author..."
+                                Text="{Binding BookSearchQuery, Mode=TwoWay}" />
                         </Grid>
 
-                        <!--  Add books  -->
+                        <!--  Available books  -->
+                        <Grid Grid.Row="1">
 
-                        <suki:GlassCard
-                            Grid.Row="1"
-                            Padding="18"
-                            IsAnimated="True"
-                            IsVisible="{Binding IsAddBooksOpen}">
+                            <ScrollViewer
+                                MaxHeight="230"
+                                HorizontalScrollBarVisibility="Disabled"
+                                IsVisible="{Binding HasAvailableBooks}"
+                                VerticalScrollBarVisibility="Auto">
 
-                            <Grid RowDefinitions="Auto,*" RowSpacing="14">
+                                <ItemsControl ItemsSource="{Binding FilteredAvailableBooks}">
 
-                                <!--  Search  -->
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate>
 
-                                <Grid
-                                    Grid.Row="0"
-                                    ColumnDefinitions="*,Auto"
-                                    ColumnSpacing="12">
+                                            <Border
+                                                Margin="0,2"
+                                                Padding="9"
+                                                CornerRadius="8">
 
-                                    <TextBox
-                                        Grid.Column="0"
-                                        Padding="12,9"
-                                        PlaceholderText="Search books..."
-                                        Text="{Binding BookSearchQuery, Mode=TwoWay}" />
+                                                <Grid ColumnDefinitions="*,Auto" ColumnSpacing="12">
 
-                                    <Button
-                                        Grid.Column="1"
-                                        Padding="16,9"
-                                        Command="{Binding ToggleAddBooksCommand}"
-                                        Content="Close" />
-
-                                </Grid>
-
-                                <!--  Available books  -->
-
-                                <Grid
-                                    Grid.Row="1"
-                                    ColumnDefinitions="*,Auto"
-                                    ColumnSpacing="12">
-
-                                    <ListBox
-                                        Grid.Column="0"
-                                        MaxHeight="260"
-                                        Background="Transparent"
-                                        BorderThickness="0"
-                                        ItemsSource="{Binding FilteredAvailableBooks}"
-                                        SelectedItem="{Binding SelectedAvailableBook, Mode=TwoWay}">
-
-                                        <ListBox.ItemTemplate>
-
-                                            <DataTemplate>
-
-                                                <Border
-                                                    Margin="0,2"
-                                                    Padding="10"
-                                                    CornerRadius="8">
-
-                                                    <Grid ColumnDefinitions="*,Auto" ColumnSpacing="12">
-
-                                                        <StackPanel Grid.Column="0" Spacing="2">
-
-                                                            <TextBlock
-                                                                FontWeight="SemiBold"
-                                                                Text="{Binding Title}"
-                                                                TextTrimming="CharacterEllipsis" />
-
-                                                            <TextBlock
-                                                                FontSize="12"
-                                                                Opacity="0.55"
-                                                                Text="{Binding Author}"
-                                                                TextTrimming="CharacterEllipsis" />
-
-                                                        </StackPanel>
-
-                                                    </Grid>
-
-                                                </Border>
-
-                                            </DataTemplate>
-
-                                        </ListBox.ItemTemplate>
-
-                                    </ListBox>
-
-                                    <Button
-                                        Grid.Column="1"
-                                        Padding="18,10"
-                                        VerticalAlignment="Top"
-                                        Command="{Binding AddSelectedBookCommand}"
-                                        Content="Add" />
-
-                                </Grid>
-
-                            </Grid>
-
-                        </suki:GlassCard>
-
-                        <!--  Collection books  -->
-
-                        <ScrollViewer
-                            Grid.Row="2"
-                            HorizontalScrollBarVisibility="Disabled"
-                            VerticalScrollBarVisibility="Auto">
-
-                            <ItemsControl ItemsSource="{Binding CollectionBooks}">
-
-                                <ItemsControl.ItemsPanel>
-
-                                    <ItemsPanelTemplate>
-
-                                        <WrapPanel
-                                            ItemHeight="324"
-                                            ItemWidth="184"
-                                            Orientation="Horizontal" />
-
-                                    </ItemsPanelTemplate>
-
-                                </ItemsControl.ItemsPanel>
-
-                                <ItemsControl.ItemTemplate>
-
-                                    <DataTemplate>
-
-                                        <suki:GlassCard
-                                            Width="184"
-                                            Height="324"
-                                            Margin="0,0,18,22"
-                                            Padding="0"
-                                            IsAnimated="True"
-                                            IsInteractive="True">
-
-                                            <Grid RowDefinitions="226,*">
-
-                                                <!--  Cover  -->
-
-                                                <Border
-                                                    Grid.Row="0"
-                                                    Height="226"
-                                                    ClipToBounds="True"
-                                                    CornerRadius="10,10,0,0">
-
-                                                    <Image Source="{Binding CoverPath, Converter={StaticResource BookCoverConverter}}" Stretch="UniformToFill" />
-
-                                                </Border>
-
-                                                <!--  Information  -->
-
-                                                <Grid
-                                                    Grid.Row="1"
-                                                    Margin="12,10,12,11"
-                                                    RowDefinitions="*,Auto"
-                                                    RowSpacing="6">
-
-                                                    <StackPanel Grid.Row="0" Spacing="4">
+                                                    <StackPanel Grid.Column="0" Spacing="2">
 
                                                         <TextBlock
-                                                            FontSize="14"
+                                                            FontSize="13.5"
                                                             FontWeight="SemiBold"
-                                                            MaxLines="2"
                                                             Text="{Binding Title}"
-                                                            TextWrapping="Wrap" />
-
-                                                        <TextBlock
-                                                            FontSize="12.5"
-                                                            Opacity="0.55"
-                                                            Text="{Binding Author}"
                                                             TextTrimming="CharacterEllipsis" />
 
+                                                        <TextBlock
+                                                            FontSize="12"
+                                                            Opacity="0.5"
+                                                            Text="{Binding Author}"
+                                                            TextTrimming="CharacterEllipsis" />
                                                     </StackPanel>
 
                                                     <Button
-                                                        Grid.Row="1"
-                                                        Padding="8,5"
-                                                        HorizontalAlignment="Stretch"
-                                                        Command="{Binding $parent[ItemsControl].DataContext.RemoveBookCommand}"
+                                                        Grid.Column="1"
+                                                        Padding="13,7"
+                                                        Classes="Flat Rounded"
+                                                        Command="{Binding $parent[ItemsControl].DataContext.AddBookCommand}"
                                                         CommandParameter="{Binding}"
-                                                        Content="Remove" />
-
+                                                        Content="Add" />
                                                 </Grid>
+                                            </Border>
 
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+                            </ScrollViewer>
+
+                            <!--  No books in library  -->
+                            <StackPanel
+                                HorizontalAlignment="Center"
+                                VerticalAlignment="Center"
+                                IsVisible="{Binding !HasAvailableBooks}"
+                                Spacing="4">
+
+                                <TextBlock
+                                    HorizontalAlignment="Center"
+                                    FontSize="14"
+                                    FontWeight="SemiBold"
+                                    Text="No books to add" />
+
+                                <TextBlock
+                                    HorizontalAlignment="Center"
+                                    FontSize="12"
+                                    Opacity="0.5"
+                                    Text="All books from your library are already here." />
+                            </StackPanel>
+
+                            <!--  Search returned nothing  -->
+                            <StackPanel
+                                HorizontalAlignment="Center"
+                                VerticalAlignment="Center"
+                                IsVisible="{Binding HasAvailableBooks, Converter={x:Static BoolConverters.Not}}"
+                                Spacing="4" />
+
+                        </Grid>
+                    </Grid>
+                </suki:GlassCard>
+
+                <!--  Collection books  -->
+                <ScrollViewer
+                    Grid.Row="2"
+                    HorizontalScrollBarVisibility="Disabled"
+                    VerticalScrollBarVisibility="Auto">
+
+                    <Grid Margin="2">
+
+                        <!--  Collection has books  -->
+                        <ItemsControl IsVisible="{Binding HasCollectionBooks}" ItemsSource="{Binding CollectionBooks}">
+
+                            <ItemsControl.ItemsPanel>
+                                <ItemsPanelTemplate>
+
+                                    <controls:ResponsiveWrapPanel
+                                        HorizontalSpacing="18"
+                                        ItemHeight="326"
+                                        ItemWidth="184"
+                                        VerticalSpacing="20" />
+
+                                </ItemsPanelTemplate>
+                            </ItemsControl.ItemsPanel>
+
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+
+                                    <suki:GlassCard
+                                        Width="184"
+                                        Height="326"
+                                        Padding="0"
+                                        IsAnimated="True"
+                                        IsInteractive="True">
+
+                                        <Grid RowDefinitions="218,*">
+
+                                            <!--  Cover  -->
+                                            <Border
+                                                Grid.Row="0"
+                                                ClipToBounds="True"
+                                                CornerRadius="10,10,0,0">
+
+                                                <Image Source="{Binding CoverPath, Converter={StaticResource BookCoverConverter}}" Stretch="UniformToFill" />
+                                            </Border>
+
+                                            <!--  Info  -->
+                                            <Grid
+                                                Grid.Row="1"
+                                                Margin="11,9,11,10"
+                                                RowDefinitions="*,Auto"
+                                                RowSpacing="6">
+
+                                                <StackPanel Grid.Row="0" Spacing="3">
+
+                                                    <TextBlock
+                                                        FontSize="13.5"
+                                                        FontWeight="SemiBold"
+                                                        MaxLines="2"
+                                                        Text="{Binding Title}"
+                                                        TextWrapping="Wrap" />
+
+                                                    <TextBlock
+                                                        FontSize="12"
+                                                        Opacity="0.5"
+                                                        Text="{Binding Author}"
+                                                        TextTrimming="CharacterEllipsis" />
+                                                </StackPanel>
+
+                                                <Button
+                                                    Grid.Row="1"
+                                                    Padding="7,5"
+                                                    Classes="Flat Rounded"
+                                                    Command="{Binding $parent[ItemsControl].DataContext.RemoveBookCommand}"
+                                                    CommandParameter="{Binding}"
+                                                    Content="Remove" />
                                             </Grid>
+                                        </Grid>
+                                    </suki:GlassCard>
 
-                                        </suki:GlassCard>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
 
-                                    </DataTemplate>
+                        <!--  Empty collection  -->
+                        <StackPanel
+                            Margin="0,50,0,0"
+                            HorizontalAlignment="Center"
+                            IsVisible="{Binding !HasCollectionBooks}"
+                            Spacing="7">
 
-                                </ItemsControl.ItemTemplate>
+                            <TextBlock
+                                HorizontalAlignment="Center"
+                                FontSize="20"
+                                FontWeight="SemiBold"
+                                Text="This collection is empty" />
 
-                            </ItemsControl>
+                            <TextBlock
+                                HorizontalAlignment="Center"
+                                FontSize="13"
+                                Opacity="0.5"
+                                Text="Add books from your library to get started." />
 
-                        </ScrollViewer>
+                            <Button
+                                Margin="0,6,0,0"
+                                Padding="15,8"
+                                HorizontalAlignment="Center"
+                                Classes="Flat Rounded"
+                                Command="{Binding ToggleAddBooksCommand}"
+                                Content="Add books" />
+                        </StackPanel>
 
                     </Grid>
-
-                </Grid>
-
+                </ScrollViewer>
             </Grid>
-
         </Grid>
-
     </Grid>
-
 </UserControl>

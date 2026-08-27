@@ -12,44 +12,40 @@
     x:DataType="vm:LibraryViewModel"
     mc:Ignorable="d">
 
+    <!--  Ресурсы представления  -->
     <UserControl.Resources>
+        <!--  Конвертер для отображения обложек книг  -->
         <converters:BookCoverConverter x:Key="BookCoverConverter" />
     </UserControl.Resources>
 
     <Grid>
+        <!--  Прокручиваемая область страницы  -->
         <ScrollViewer HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto">
-
             <Grid Margin="28,24,28,32" RowDefinitions="Auto,*">
 
-                <!--  Header  -->
-
+                <!--  Заголовок страницы  -->
                 <Grid
                     Grid.Row="0"
                     Margin="0,0,0,28"
                     ColumnDefinitions="Auto,*,Auto,Auto"
                     ColumnSpacing="12">
 
-                    <!--  Title  -->
-
+                    <!--  Название и описание библиотеки  -->
                     <StackPanel
                         Grid.Column="0"
                         VerticalAlignment="Center"
                         Spacing="5">
-
                         <TextBlock
                             FontSize="32"
                             FontWeight="SemiBold"
                             Text="Library" />
-
                         <TextBlock
                             FontSize="14"
                             Opacity="0.6"
                             Text="Your books in one place." />
-
                     </StackPanel>
 
-                    <!--  Search  -->
-
+                    <!--  Поиск по библиотеке  -->
                     <Border
                         Grid.Column="1"
                         MinWidth="220"
@@ -61,7 +57,6 @@
                         BorderBrush="#18FFFFFF"
                         BorderThickness="1"
                         CornerRadius="10">
-
                         <TextBox
                             Padding="4,6"
                             Background="Transparent"
@@ -69,11 +64,9 @@
                             FontSize="14"
                             PlaceholderText="Search your library..."
                             Text="{Binding SearchQuery, Mode=TwoWay}" />
-
                     </Border>
 
-                    <!--  Sort  -->
-
+                    <!--  Сортировка книг  -->
                     <ComboBox
                         Grid.Column="2"
                         Width="145"
@@ -81,98 +74,84 @@
                         ItemsSource="{Binding SortOptions}"
                         SelectedItem="{Binding SelectedSort, Mode=TwoWay}" />
 
-                    <!--  Add books  -->
-
+                    <!--  Добавление книг в библиотеку  -->
                     <Button
                         Grid.Column="3"
                         Padding="20,10"
                         VerticalAlignment="Center"
                         Click="AddBooks_Click"
                         Content="Add books" />
-
                 </Grid>
 
-                <!--  Content  -->
-
+                <!--  Основное содержимое библиотеки  -->
                 <Grid Grid.Row="1">
 
-                    <!--  Empty library  -->
-
+                    <!--  Состояние пустой библиотеки  -->
                     <StackPanel
                         MaxWidth="420"
                         HorizontalAlignment="Center"
                         VerticalAlignment="Center"
                         IsVisible="{Binding IsEmpty}"
                         Spacing="10">
-
                         <TextBlock
                             HorizontalAlignment="Center"
                             FontSize="26"
                             FontWeight="SemiBold"
                             Text="Your library is empty" />
-
                         <TextBlock
                             HorizontalAlignment="Center"
                             Opacity="0.6"
                             Text="Add your first books to start reading."
                             TextAlignment="Center" />
 
+                        <!--  Добавление первой книги  -->
                         <Button
                             Margin="0,14,0,0"
                             Padding="24,12"
                             HorizontalAlignment="Center"
                             Click="AddBooks_Click"
                             Content="Add books" />
-
                     </StackPanel>
 
-                    <!--  Search returned nothing  -->
-
+                    <!--  Состояние при отсутствии результатов поиска  -->
                     <StackPanel
                         MaxWidth="420"
                         HorizontalAlignment="Center"
                         VerticalAlignment="Center"
                         IsVisible="{Binding IsSearchEmpty}"
                         Spacing="10">
-
                         <TextBlock
                             HorizontalAlignment="Center"
                             FontSize="26"
                             FontWeight="SemiBold"
                             Text="No books found" />
-
                         <TextBlock
                             HorizontalAlignment="Center"
                             Opacity="0.6"
                             Text="Try a different title or author."
                             TextAlignment="Center" />
-
                     </StackPanel>
 
-                    <!--  Books  -->
-
+                    <!--  Сетка книг библиотеки  -->
                     <ItemsControl
                         HorizontalAlignment="Stretch"
                         IsVisible="{Binding !IsEmpty}"
                         ItemsSource="{Binding FilteredBooks}">
-
                         <ItemsControl.ItemsPanel>
                             <ItemsPanelTemplate>
-
+                                <!--  Адаптивная сетка карточек книг  -->
                                 <controls:ResponsiveWrapPanel
                                     HorizontalAlignment="Stretch"
                                     HorizontalSpacing="18"
                                     ItemHeight="324"
                                     ItemWidth="184"
                                     VerticalSpacing="22" />
-
                             </ItemsPanelTemplate>
                         </ItemsControl.ItemsPanel>
 
                         <ItemsControl.ItemTemplate>
-
                             <DataTemplate>
-
+                                <!--  Карточка книги  -->
                                 <suki:GlassCard
                                     Width="184"
                                     Height="324"
@@ -181,9 +160,9 @@
                                     IsAnimated="True"
                                     IsInteractive="True"
                                     PointerPressed="BookCard_PointerPressed">
-
                                     <Grid RowDefinitions="226,*">
 
+                                        <!--  Обложка книги  -->
                                         <Border
                                             Grid.Row="0"
                                             Height="226"
@@ -191,16 +170,16 @@
                                             VerticalAlignment="Top"
                                             ClipToBounds="True"
                                             CornerRadius="10,10,0,0">
-
                                             <Image Source="{Binding CoverPath, Converter={StaticResource BookCoverConverter}}" Stretch="UniformToFill" />
-
                                         </Border>
 
+                                        <!--  Информация о книге  -->
                                         <Grid
                                             Grid.Row="1"
                                             Margin="12,10,12,11"
                                             RowDefinitions="Auto,Auto,*">
 
+                                            <!--  Название книги  -->
                                             <TextBlock
                                                 Grid.Row="0"
                                                 FontSize="14"
@@ -210,6 +189,7 @@
                                                 Text="{Binding Title}"
                                                 TextWrapping="Wrap" />
 
+                                            <!--  Автор книги  -->
                                             <TextBlock
                                                 Grid.Row="1"
                                                 Margin="0,4,0,0"
@@ -218,25 +198,14 @@
                                                 Text="{Binding Author}"
                                                 TextTrimming="CharacterEllipsis"
                                                 TextWrapping="NoWrap" />
-
                                         </Grid>
-
                                     </Grid>
-
                                 </suki:GlassCard>
-
                             </DataTemplate>
-
                         </ItemsControl.ItemTemplate>
-
                     </ItemsControl>
-
                 </Grid>
-
             </Grid>
-
         </ScrollViewer>
-
     </Grid>
-
 </UserControl>

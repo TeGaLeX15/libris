@@ -9,13 +9,27 @@ using Libris.ViewModels;
 
 namespace Libris.Views;
 
+/// <summary>
+/// Представляет представление библиотеки книг.
+/// Отвечает за взаимодействие с пользовательским интерфейсом библиотеки
+/// и обработку выбора и добавления книг.
+/// </summary>
 public partial class LibraryView : UserControl
 {
+    /// <summary>
+    /// Инициализирует новое представление библиотеки.
+    /// </summary>
     public LibraryView()
     {
         InitializeComponent();
     }
 
+    /// <summary>
+    /// Обрабатывает нажатие на карточку книги
+    /// и открывает выбранную книгу через модель представления.
+    /// </summary>
+    /// <param name="sender">Элемент управления, на котором произошло нажатие.</param>
+    /// <param name="e">Аргументы события нажатия указателя.</param>
     private void BookCard_PointerPressed(
         object? sender,
         PointerPressedEventArgs e)
@@ -32,6 +46,12 @@ public partial class LibraryView : UserControl
         viewModel.SelectBook(book);
     }
 
+    /// <summary>
+    /// Открывает системный диалог выбора файлов
+    /// и добавляет выбранные книги в библиотеку.
+    /// </summary>
+    /// <param name="sender">Элемент управления, вызвавший событие.</param>
+    /// <param name="e">Аргументы события маршрутизации.</param>
     private async void AddBooks_Click(
         object? sender,
         RoutedEventArgs e)

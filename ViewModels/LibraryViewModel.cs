@@ -10,36 +10,93 @@ using Libris.Services;
 
 namespace Libris.ViewModels;
 
+/// <summary>
+/// Определяет доступные варианты сортировки книг в библиотеке.
+/// </summary>
+public enum BookSortOption
+{
+    /// <summary>
+    /// Сортировка книг по названию от А до Я.
+    /// </summary>
+    TitleAscending,
+
+    /// <summary>
+    /// Сортировка книг по названию от Я до А.
+    /// </summary>
+    TitleDescending,
+
+    /// <summary>
+    /// Сортировка книг по автору от А до Я.
+    /// </summary>
+    AuthorAscending,
+
+    /// <summary>
+    /// Сортировка книг по автору от Я до А.
+    /// </summary>
+    AuthorDescending
+}
+
+/// <summary>
+/// Представляет ViewModel библиотеки, отвечающую за загрузку,
+/// поиск, сортировку, добавление и удаление книг.
+/// </summary>
 public partial class LibraryViewModel : ViewModelBase
 {
     private readonly LibraryService _libraryService;
 
+    /// <summary>
+    /// Содержит все книги, загруженные в библиотеку.
+    /// </summary>
     public ObservableCollection<Book> Books { get; } = [];
 
+    /// <summary>
+    /// Содержит книги, отображаемые после применения поиска и сортировки.
+    /// </summary>
     public ObservableCollection<Book> FilteredBooks { get; } = [];
 
-    public IReadOnlyList<string> SortOptions { get; } =
+    /// <summary>
+    /// Содержит доступные варианты сортировки книг.
+    /// </summary>
+    public IReadOnlyList<BookSortOption> SortOptions { get; } =
     [
-        "Title: A–Z",
-        "Title: Z–A",
-        "Author: A–Z",
-        "Author: Z–A"
+        BookSortOption.TitleAscending,
+        BookSortOption.TitleDescending,
+        BookSortOption.AuthorAscending,
+        BookSortOption.AuthorDescending
     ];
 
+    /// <summary>
+    /// Возникает при выборе пользователем книги.
+    /// </summary>
     public event EventHandler<Book>? BookSelected;
 
+    /// <summary>
+    /// Указывает, пуста ли библиотека.
+    /// </summary>
     [ObservableProperty]
     private bool isEmpty;
 
+    /// <summary>
+    /// Указывает, что поиск выполнен, но подходящие книги не найдены.
+    /// </summary>
     [ObservableProperty]
     private bool isSearchEmpty;
 
+    /// <summary>
+    /// Содержит текущий поисковый запрос пользователя.
+    /// </summary>
     [ObservableProperty]
     private string searchQuery = string.Empty;
 
+    /// <summary>
+    /// Определяет текущий способ сортировки книг.
+    /// </summary>
     [ObservableProperty]
-    private string selectedSort = "Title: A–Z";
+    private BookSortOption selectedSort = BookSortOption.TitleAscending;
 
+    /// <summary>
+    /// Инициализирует ViewModel библиотеки и загружает сохранённые книги.
+    /// </summary>
     public LibraryViewModel()
     {
         _libraryService = new LibraryService();
@@ -47,16 +104,28 @@ public partial class LibraryViewModel : ViewModelBase
         LoadBooks();
     }
 
+    /// <summary>
+    /// Обновляет отображаемый список книг при изменении поискового запроса.
+    /// </summary>
+    /// <param name="value">Новое значение поискового запроса.</param>
     partial void OnSearchQueryChanged(string value)
     {
-        ApplyFilter();
+        UpdateFilteredBooks();
     }
 
-    partial void OnSelectedSortChanged(string value)
+    /// <summary>
+    /// Обновляет отображаемый список книг при изменении способа сортировки.
+    /// </summary>
+    /// <param name="value">Новый вариант сортировки.</param>
+    partial void OnSelectedSortChanged(BookSortOption value)
     {
-        ApplyFilter();
+        UpdateFilteredBooks();
     }
 
+    /// <summary>
+    /// Выбирает книгу и уведомляет подписчиков о её выборе.
+    /// </summary>
+    /// <param name="book">Выбранная книга.</param>
     public void SelectBook(Book? book)
     {
         if (book is null)
@@ -65,6 +134,9 @@ public partial class LibraryViewModel : ViewModelBase
         BookSelected?.Invoke(this, book);
     }
 
+    /// <summary>
+    /// Загружает сохранённые книги через сервис библиотеки.
+    /// </summary>
     private void LoadBooks()
     {
         Books.Clear();
@@ -74,9 +146,14 @@ public partial class LibraryViewModel : ViewModelBase
             Books.Add(book);
         }
 
-        ApplyFilter();
+        UpdateFilteredBooks();
     }
 
+    /// <summary>
+    /// Импортирует книги из указанных файлов и добавляет их в библиотеку.
+    /// </summary>
+    /// <param name="filePaths">Пути к файлам книг для импорта.</param>
+    /// <returns>Задача, представляющая асинхронную операцию импорта.</returns>
     public async Task AddBooksAsync(IEnumerable<string> filePaths)
     {
         foreach (var filePath in filePaths)
@@ -92,54 +169,58 @@ public partial class LibraryViewModel : ViewModelBase
             Books.Add(book);
         }
 
-        ApplyFilter();
+        UpdateFilteredBooks();
     }
 
+    /// <summary>
+    /// Удаляет указанную книгу из библиотеки.
+    /// </summary>
+    /// <param name="book">Книга, которую необходимо удалить.</param>
     public void RemoveBook(Book? book)
     {
         if (book is null)
             return;
 
         _libraryService.Remove(book.Id);
-
         Books.Remove(book);
 
-        ApplyFilter();
+        UpdateFilteredBooks();
     }
 
-    private void ApplyFilter()
+    /// <summary>
+    /// Применяет текущий поисковый запрос и выбранную сортировку,
+    /// после чего обновляет список книг, отображаемый в интерфейсе.
+    /// </summary>
+    private void UpdateFilteredBooks()
     {
         var query = SearchQuery.Trim();
-
         IEnumerable<Book> result = Books;
 
         if (!string.IsNullOrWhiteSpace(query))
         {
             result = result.Where(book =>
-                (!string.IsNullOrWhiteSpace(book.Title) &&
-                 book.Title.Contains(
-                     query,
-                     StringComparison.OrdinalIgnoreCase))
+                book.Title?.Contains(
+                    query,
+                    StringComparison.OrdinalIgnoreCase) == true
                 ||
-                (!string.IsNullOrWhiteSpace(book.Author) &&
-                 book.Author.Contains(
-                     query,
-                     StringComparison.OrdinalIgnoreCase)));
+                book.Author?.Contains(
+                    query,
+                    StringComparison.OrdinalIgnoreCase) == true);
         }
 
         result = SelectedSort switch
         {
-            "Title: A–Z" =>
+            BookSortOption.TitleAscending =>
                 result.OrderBy(
                     book => book.Title ?? string.Empty,
                     StringComparer.CurrentCultureIgnoreCase),
 
-            "Title: Z–A" =>
+            BookSortOption.TitleDescending =>
                 result.OrderByDescending(
                     book => book.Title ?? string.Empty,
                     StringComparer.CurrentCultureIgnoreCase),
 
-            "Author: A–Z" =>
+            BookSortOption.AuthorAscending =>
                 result.OrderBy(
                     book => book.Author ?? string.Empty,
                     StringComparer.CurrentCultureIgnoreCase)
@@ -147,7 +228,7 @@ public partial class LibraryViewModel : ViewModelBase
                     book => book.Title ?? string.Empty,
                     StringComparer.CurrentCultureIgnoreCase),
 
-            "Author: Z–A" =>
+            BookSortOption.AuthorDescending =>
                 result.OrderByDescending(
                     book => book.Author ?? string.Empty,
                     StringComparer.CurrentCultureIgnoreCase)
@@ -165,6 +246,16 @@ public partial class LibraryViewModel : ViewModelBase
             FilteredBooks.Add(book);
         }
 
+        UpdateEmptyState(query);
+    }
+
+    /// <summary>
+    /// Обновляет состояния пустой библиотеки и пустого результата поиска,
+    /// используемые интерфейсом для отображения соответствующих состояний.
+    /// </summary>
+    /// <param name="query">Нормализованный поисковый запрос.</param>
+    private void UpdateEmptyState(string query)
+    {
         IsEmpty = Books.Count == 0;
 
         IsSearchEmpty =

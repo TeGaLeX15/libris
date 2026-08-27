@@ -7,12 +7,14 @@
     xmlns:suki="clr-namespace:SukiUI;assembly=SukiUI"
     RequestedThemeVariant="Default">
 
+    <!--  Поиск View для ViewModel  -->
     <Application.DataTemplates>
         <local:ViewLocator />
     </Application.DataTemplates>
 
+    <!--  Тема приложения  -->
     <Application.Styles>
         <suki:SukiTheme Locale="en-US" ThemeColor="Blue" />
     </Application.Styles>
-    
+
 </Application>

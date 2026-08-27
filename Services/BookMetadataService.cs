@@ -4,16 +4,39 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Xml.Linq;
+
 using VersOne.Epub;
 
 namespace Libris.Services;
 
+/// <summary>
+/// Отвечает за извлечение метаданных и обложек из файлов книг
+/// поддерживаемых форматов.
+/// </summary>
 public sealed class BookMetadataService
 {
+    private const string FictionBookNamespace =
+        "http://www.gribuser.ru/xml/fictionbook/2.0";
+
+    private const string XLinkNamespace =
+        "http://www.w3.org/1999/xlink";
+
+    /// <summary>
+    /// Читает метаданные книги из указанного файла.
+    /// </summary>
+    /// <param name="filePath">Путь к файлу книги.</param>
+    /// <returns>
+    /// Извлечённые метаданные книги или резервные метаданные,
+    /// если файл не существует, формат не поддерживается
+    /// или чтение метаданных завершилось ошибкой.
+    /// </returns>
     public async Task<BookMetadata> ReadAsync(string filePath)
     {
-        if (string.IsNullOrWhiteSpace(filePath) || !File.Exists(filePath))
+        if (string.IsNullOrWhiteSpace(filePath) ||
+            !File.Exists(filePath))
+        {
             return CreateFallbackMetadata(filePath);
+        }
 
         var extension = Path.GetExtension(filePath);
 
@@ -28,13 +51,28 @@ public sealed class BookMetadataService
                 _ => CreateFallbackMetadata(filePath)
             };
         }
-        catch
+        catch (IOException)
         {
-            // Metadata extraction should never prevent a book from being imported.
+            // Ошибки чтения файла не должны препятствовать импорту книги.
+            return CreateFallbackMetadata(filePath);
+        }
+        catch (UnauthorizedAccessException)
+        {
+            // Отсутствие доступа к файлу не должно препятствовать импорту книги.
+            return CreateFallbackMetadata(filePath);
+        }
+        catch (InvalidOperationException)
+        {
+            // Ошибки обработки содержимого книги не должны препятствовать импорту.
             return CreateFallbackMetadata(filePath);
         }
     }
 
+    /// <summary>
+    /// Извлекает метаданные и обложку из EPUB-файла.
+    /// </summary>
+    /// <param name="filePath">Путь к EPUB-файлу.</param>
+    /// <returns>Метаданные книги, извлечённые из EPUB.</returns>
     private static async Task<BookMetadata> ReadEpubAsync(string filePath)
     {
         var epubBook = await EpubReader.ReadBookAsync(filePath);
@@ -55,24 +93,33 @@ public sealed class BookMetadataService
         };
     }
 
+    /// <summary>
+    /// Извлекает изображение обложки из EPUB-книги.
+    /// </summary>
+    /// <param name="epubBook">Открытая EPUB-книга.</param>
+    /// <returns>Данные изображения обложки или <see langword="null"/>,
+    /// если обложку получить не удалось.</returns>
     private static byte[]? ExtractEpubCover(EpubBook epubBook)
     {
         try
         {
             return epubBook.CoverImage;
         }
-        catch
+        catch (InvalidOperationException)
         {
             return null;
         }
     }
 
+    /// <summary>
+    /// Извлекает метаданные и обложку из FB2-файла.
+    /// </summary>
+    /// <param name="filePath">Путь к FB2-файлу.</param>
+    /// <returns>Метаданные книги, извлечённые из FB2.</returns>
     private static BookMetadata ReadFb2(string filePath)
     {
         var document = XDocument.Load(filePath);
-
-        XNamespace fictionBook =
-            "http://www.gribuser.ru/xml/fictionbook/2.0";
+        var fictionBook = XNamespace.Get(FictionBookNamespace);
 
         var description = document
             .Descendants(fictionBook + "description")
@@ -122,10 +169,21 @@ public sealed class BookMetadataService
                 ? null
                 : author,
 
-            CoverBytes = ExtractFb2Cover(document, fictionBook)
+            CoverBytes = ExtractFb2Cover(
+                document,
+                fictionBook)
         };
     }
 
+    /// <summary>
+    /// Извлекает обложку из FB2-документа.
+    /// </summary>
+    /// <param name="document">XML-документ FB2.</param>
+    /// <param name="fictionBook">XML-пространство имён FictionBook.</param>
+    /// <returns>
+    /// Данные изображения обложки или <see langword="null"/>,
+    /// если обложка отсутствует или не может быть извлечена.
+    /// </returns>
     private static byte[]? ExtractFb2Cover(
         XDocument document,
         XNamespace fictionBook)
@@ -143,7 +201,7 @@ public sealed class BookMetadataService
             var href = (string?)coverImage.Attribute(
                 XName.Get(
                     "href",
-                    "http://www.w3.org/1999/xlink"));
+                    XLinkNamespace));
 
             if (string.IsNullOrWhiteSpace(href))
                 return null;
@@ -168,17 +226,34 @@ public sealed class BookMetadataService
 
             return Convert.FromBase64String(base64);
         }
-        catch
+        catch (FormatException)
+        {
+            // Некорректные Base64-данные не должны препятствовать импорту книги.
+            return null;
+        }
+        catch (InvalidOperationException)
         {
             return null;
         }
     }
 
+    /// <summary>
+    /// Возвращает резервные метаданные для PDF-файла.
+    /// Полноценное извлечение метаданных PDF будет реализовано отдельно.
+    /// </summary>
+    /// <param name="filePath">Путь к PDF-файлу.</param>
+    /// <returns>Резервные метаданные книги.</returns>
     private static BookMetadata ReadPdfFallback(string filePath)
     {
         return CreateFallbackMetadata(filePath);
     }
 
+    /// <summary>
+    /// Создаёт минимальный набор метаданных на основе имени файла.
+    /// Используется, когда метаданные книги недоступны.
+    /// </summary>
+    /// <param name="filePath">Путь к файлу книги.</param>
+    /// <returns>Резервные метаданные книги.</returns>
     private static BookMetadata CreateFallbackMetadata(string filePath)
     {
         return new BookMetadata
@@ -190,23 +265,55 @@ public sealed class BookMetadataService
     }
 }
 
+/// <summary>
+/// Содержит метаданные, извлечённые из файла книги.
+/// </summary>
 public sealed class BookMetadata
 {
+    /// <summary>
+    /// Название книги.
+    /// </summary>
     public string Title { get; init; } = string.Empty;
 
+    /// <summary>
+    /// Автор книги.
+    /// </summary>
     public string? Author { get; init; }
 
+    /// <summary>
+    /// Описание или аннотация книги.
+    /// </summary>
     public string? Description { get; init; }
 
+    /// <summary>
+    /// Издательство книги.
+    /// </summary>
     public string? Publisher { get; init; }
 
+    /// <summary>
+    /// Язык книги.
+    /// </summary>
     public string? Language { get; init; }
 
+    /// <summary>
+    /// Международный стандартный номер книги (ISBN).
+    /// </summary>
     public string? Isbn { get; init; }
 
+    /// <summary>
+    /// Дата публикации книги.
+    /// </summary>
     public DateTime? PublishedAt { get; init; }
 
+    /// <summary>
+    /// Путь к сохранённому файлу обложки.
+    /// Заполняется после сохранения изображения обложки.
+    /// </summary>
     public string? CoverPath { get; init; }
 
+    /// <summary>
+    /// Данные изображения обложки в памяти.
+    /// Используются для последующего сохранения обложки.
+    /// </summary>
     public byte[]? CoverBytes { get; init; }
 }

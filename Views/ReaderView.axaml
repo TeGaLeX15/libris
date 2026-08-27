@@ -8,10 +8,9 @@
     x:DataType="vm:ReaderViewModel">
 
     <Grid>
-
         <Grid RowDefinitions="Auto,*,Auto">
 
-            <!--  Top bar  -->
+            <!--  Верхняя панель  -->
             <Border
                 Grid.Row="0"
                 Padding="22,14"
@@ -19,6 +18,7 @@
 
                 <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="16">
 
+                    <!--  Возврат в библиотеку  -->
                     <Button
                         Grid.Column="0"
                         Padding="13,8"
@@ -26,6 +26,7 @@
                         Command="{Binding CloseCommand}"
                         Content="←  Library" />
 
+                    <!--  Информация о книге  -->
                     <StackPanel
                         Grid.Column="1"
                         HorizontalAlignment="Center"
@@ -42,14 +43,15 @@
                             FontSize="12"
                             Opacity="0.5"
                             Text="{Binding Author}" />
-
                     </StackPanel>
 
+                    <!--  Действия чтения  -->
                     <StackPanel
                         Grid.Column="2"
                         Orientation="Horizontal"
                         Spacing="6">
 
+                        <!--  Настройки текста  -->
                         <Button
                             Width="38"
                             Height="38"
@@ -57,20 +59,18 @@
                             Classes="Flat Rounded"
                             Content="Aa" />
 
+                        <!--  Дополнительные действия  -->
                         <Button
                             Width="38"
                             Height="38"
                             Padding="0"
                             Classes="Flat Rounded"
                             Content="⋮" />
-
                     </StackPanel>
-
                 </Grid>
-
             </Border>
 
-            <!--  Reading area  -->
+            <!--  Область чтения  -->
             <ScrollViewer
                 Grid.Row="1"
                 HorizontalScrollBarVisibility="Disabled"
@@ -84,25 +84,24 @@
 
                     <StackPanel Spacing="28">
 
+                        <!--  Заголовок главы  -->
                         <TextBlock
                             FontSize="30"
                             FontWeight="SemiBold"
                             Text="Chapter One"
                             TextWrapping="Wrap" />
 
+                        <!--  Текст книги  -->
                         <TextBlock
                             FontSize="{Binding FontSize}"
                             LineHeight="{Binding LineHeight}"
                             Text="{Binding Content}"
                             TextWrapping="Wrap" />
-
                     </StackPanel>
-
                 </Grid>
-
             </ScrollViewer>
 
-            <!--  Bottom bar  -->
+            <!--  Нижняя панель навигации  -->
             <Border
                 Grid.Row="2"
                 Padding="22,12"
@@ -110,12 +109,14 @@
 
                 <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="18">
 
+                    <!--  Предыдущая глава  -->
                     <Button
                         Grid.Column="0"
                         Padding="12,7"
                         Classes="Flat Rounded"
                         Content="Previous" />
 
+                    <!--  Прогресс чтения  -->
                     <StackPanel
                         Grid.Column="1"
                         VerticalAlignment="Center"
@@ -128,7 +129,6 @@
                             Value="{Binding Progress}" />
 
                         <Grid ColumnDefinitions="*,Auto">
-
                             <TextBlock
                                 FontSize="11"
                                 Opacity="0.45"
@@ -139,23 +139,17 @@
                                 FontSize="11"
                                 Opacity="0.45"
                                 Text="{Binding PositionText}" />
-
                         </Grid>
-
                     </StackPanel>
 
+                    <!--  Следующая глава  -->
                     <Button
                         Grid.Column="2"
                         Padding="12,7"
                         Classes="Flat Rounded"
                         Content="Next" />
-
                 </Grid>
-
             </Border>
-
         </Grid>
-
     </Grid>
-
 </UserControl>

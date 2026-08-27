@@ -2,25 +2,36 @@
 using System;
 using System.IO;
 using System.Text.Json;
+
 using Libris.Models;
 
 namespace Libris.Services;
 
+/// <summary>
+/// Отвечает за сохранение и загрузку данных приложения Libris.
+/// </summary>
 public sealed class AppDataService
 {
     private readonly string _dataDirectory;
     private readonly string _dataFile;
 
+    /// <summary>
+    /// Настройки сериализации данных приложения.
+    /// </summary>
     private static readonly JsonSerializerOptions JsonOptions = new()
     {
         WriteIndented = true,
         PropertyNameCaseInsensitive = true
     };
 
+    /// <summary>
+    /// Инициализирует сервис хранения данных приложения.
+    /// </summary>
     public AppDataService()
     {
         _dataDirectory = Path.Combine(
-            Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
+            Environment.GetFolderPath(
+                Environment.SpecialFolder.ApplicationData),
             "Libris");
 
         _dataFile = Path.Combine(
@@ -28,6 +39,13 @@ public sealed class AppDataService
             "data.json");
     }
 
+    /// <summary>
+    /// Загружает данные приложения из локального файла.
+    /// </summary>
+    /// <returns>
+    /// Загруженные данные приложения или новый объект <see cref="AppData"/>,
+    /// если файл отсутствует или его содержимое невозможно прочитать.
+    /// </returns>
     public AppData Load()
     {
         try
@@ -42,12 +60,27 @@ public sealed class AppDataService
                        JsonOptions)
                    ?? new AppData();
         }
-        catch
+        catch (JsonException)
         {
+            // Повреждённый JSON не должен приводить к падению приложения.
+            return new AppData();
+        }
+        catch (IOException)
+        {
+            // Ошибки чтения файла не должны приводить к падению приложения.
+            return new AppData();
+        }
+        catch (UnauthorizedAccessException)
+        {
+            // Отсутствие доступа к файлу не должно приводить к падению приложения.
             return new AppData();
         }
     }
 
+    /// <summary>
+    /// Сохраняет данные приложения в локальный JSON-файл.
+    /// </summary>
+    /// <param name="data">Данные приложения для сохранения.</param>
     public void Save(AppData data)
     {
         try
@@ -60,9 +93,13 @@ public sealed class AppDataService
 
             File.WriteAllText(_dataFile, json);
         }
-        catch
+        catch (IOException)
         {
-            // Application data should never be able to crash the application.
+            // Ошибка записи данных не должна приводить к падению приложения.
+        }
+        catch (UnauthorizedAccessException)
+        {
+            // Отсутствие доступа к файлу не должно приводить к падению приложения.
         }
     }
 }

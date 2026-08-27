@@ -22,13 +22,9 @@
         </Style>
     </UserControl.Styles>
 
-
     <Grid RowDefinitions="Auto,*">
 
-        <!--  =========================================================  -->
-        <!--  HEADER  -->
-        <!--  =========================================================  -->
-
+        <!--  Заголовок панели  -->
         <Grid
             Grid.Row="0"
             Margin="22,18,18,12"
@@ -50,14 +46,9 @@
                 Command="{Binding CloseCommand}"
                 Content="×"
                 FontSize="22" />
-
         </Grid>
 
-
-        <!--  =========================================================  -->
-        <!--  CONTENT  -->
-        <!--  =========================================================  -->
-
+        <!--  Основное содержимое  -->
         <ScrollViewer
             Grid.Row="1"
             HorizontalScrollBarVisibility="Disabled"
@@ -65,11 +56,7 @@
 
             <StackPanel Margin="22,4,22,28" Spacing="22">
 
-
-                <!--  =================================================  -->
-                <!--  COVER  -->
-                <!--  =================================================  -->
-
+                <!--  Обложка  -->
                 <Border
                     Width="220"
                     Height="320"
@@ -78,14 +65,9 @@
                     CornerRadius="12">
 
                     <Image Source="{Binding Book.CoverPath, Converter={StaticResource BookCoverConverter}}" Stretch="UniformToFill" />
-
                 </Border>
 
-
-                <!--  =================================================  -->
-                <!--  TITLE  -->
-                <!--  =================================================  -->
-
+                <!--  Название и автор  -->
                 <StackPanel Spacing="5">
 
                     <TextBlock
@@ -99,14 +81,9 @@
                         Opacity="0.55"
                         Text="{Binding Author}"
                         TextWrapping="Wrap" />
-
                 </StackPanel>
 
-
-                <!--  =================================================  -->
-                <!--  PRIMARY ACTIONS  -->
-                <!--  =================================================  -->
-
+                <!--  Основные действия  -->
                 <Grid ColumnDefinitions="*,*" ColumnSpacing="10">
 
                     <Button
@@ -125,14 +102,9 @@
                         Classes="Outlined Rounded"
                         Content="Add to collection"
                         FontSize="14" />
-
                 </Grid>
 
-
-                <!--  =================================================  -->
-                <!--  INFORMATION  -->
-                <!--  =================================================  -->
-
+                <!--  Информация о файле  -->
                 <StackPanel Spacing="10">
 
                     <TextBlock
@@ -148,31 +120,24 @@
                         <StackPanel Spacing="13">
 
                             <Grid ColumnDefinitions="*,Auto">
-
                                 <TextBlock Opacity="0.55" Text="Format" />
 
                                 <TextBlock
                                     Grid.Column="1"
                                     FontWeight="SemiBold"
                                     Text="{Binding Format}" />
-
                             </Grid>
 
-
                             <Grid ColumnDefinitions="*,Auto">
-
                                 <TextBlock Opacity="0.55" Text="File size" />
 
                                 <TextBlock
                                     Grid.Column="1"
                                     FontWeight="SemiBold"
                                     Text="{Binding FileSize}" />
-
                             </Grid>
 
-
                             <Grid ColumnDefinitions="*,Auto">
-
                                 <TextBlock Opacity="0.55" Text="File" />
 
                                 <TextBlock
@@ -181,20 +146,12 @@
                                     FontWeight="SemiBold"
                                     Text="{Binding FileName}"
                                     TextTrimming="CharacterEllipsis" />
-
                             </Grid>
-
                         </StackPanel>
-
                     </suki:GlassCard>
-
                 </StackPanel>
 
-
-                <!--  =================================================  -->
-                <!--  READING  -->
-                <!--  =================================================  -->
-
+                <!--  Прогресс чтения  -->
                 <StackPanel Spacing="10">
 
                     <TextBlock
@@ -210,16 +167,13 @@
                         <StackPanel Spacing="12">
 
                             <Grid ColumnDefinitions="*,Auto">
-
                                 <TextBlock Opacity="0.55" Text="Progress" />
 
                                 <TextBlock
                                     Grid.Column="1"
                                     FontWeight="SemiBold"
                                     Text="Not started" />
-
                             </Grid>
-
 
                             <ProgressBar
                                 Height="6"
@@ -227,23 +181,15 @@
                                 Minimum="0"
                                 Value="0" />
 
-
                             <TextBlock
                                 FontSize="12"
                                 Opacity="0.45"
                                 Text="Start reading to track your progress." />
-
                         </StackPanel>
-
                     </suki:GlassCard>
-
                 </StackPanel>
 
-
-                <!--  =================================================  -->
-                <!--  MORE ACTIONS  -->
-                <!--  =================================================  -->
-
+                <!--  Дополнительные действия  -->
                 <StackPanel Spacing="8">
 
                     <TextBlock
@@ -262,13 +208,8 @@
                         HorizontalContentAlignment="Left"
                         Classes="Flat Rounded remove-button"
                         Content="Remove from library" />
-
                 </StackPanel>
-
             </StackPanel>
-
         </ScrollViewer>
-
     </Grid>
-
 </UserControl>

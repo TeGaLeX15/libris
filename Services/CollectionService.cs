@@ -4,10 +4,15 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text.Json;
+
 using Libris.Models;
 
 namespace Libris.Services;
 
+/// <summary>
+/// Отвечает за создание, загрузку, изменение и удаление
+/// пользовательских коллекций книг.
+/// </summary>
 public sealed class CollectionService
 {
     private const string LibraryDirectoryName = "Libris";
@@ -16,12 +21,18 @@ public sealed class CollectionService
     private readonly string _libraryDirectory;
     private readonly string _collectionsFile;
 
+    /// <summary>
+    /// Настройки сериализации коллекций.
+    /// </summary>
     private static readonly JsonSerializerOptions JsonOptions = new()
     {
         WriteIndented = true,
         PropertyNameCaseInsensitive = true
     };
 
+    /// <summary>
+    /// Инициализирует сервис хранения коллекций.
+    /// </summary>
     public CollectionService()
     {
         _libraryDirectory = Path.Combine(
@@ -34,6 +45,13 @@ public sealed class CollectionService
             CollectionsFileName);
     }
 
+    /// <summary>
+    /// Загружает все сохранённые коллекции.
+    /// </summary>
+    /// <returns>
+    /// Список коллекций или пустой список,
+    /// если файл отсутствует или его невозможно прочитать.
+    /// </returns>
     public IReadOnlyList<BookCollection> Load()
     {
         try
@@ -48,12 +66,27 @@ public sealed class CollectionService
                        JsonOptions)
                    ?? [];
         }
-        catch
+        catch (JsonException)
         {
+            // Повреждённые данные коллекций не должны приводить к падению приложения.
+            return [];
+        }
+        catch (IOException)
+        {
+            // Ошибка чтения файла не должна приводить к падению приложения.
+            return [];
+        }
+        catch (UnauthorizedAccessException)
+        {
+            // Отсутствие доступа к файлу не должно приводить к падению приложения.
             return [];
         }
     }
 
+    /// <summary>
+    /// Сохраняет коллекции в локальный JSON-файл.
+    /// </summary>
+    /// <param name="collections">Коллекции для сохранения.</param>
     public void Save(IEnumerable<BookCollection> collections)
     {
         try
@@ -68,12 +101,24 @@ public sealed class CollectionService
                 _collectionsFile,
                 json);
         }
-        catch
+        catch (IOException)
         {
-            // Collection persistence should never crash the application.
+            // Ошибка записи коллекций не должна приводить к падению приложения.
+        }
+        catch (UnauthorizedAccessException)
+        {
+            // Отсутствие доступа к файлу не должно приводить к падению приложения.
         }
     }
 
+    /// <summary>
+    /// Создаёт новую коллекцию.
+    /// </summary>
+    /// <param name="name">Название новой коллекции.</param>
+    /// <returns>
+    /// Созданная коллекция или <see langword="null"/>,
+    /// если название пустое.
+    /// </returns>
     public BookCollection? Create(string name)
     {
         if (string.IsNullOrWhiteSpace(name))
@@ -92,8 +137,14 @@ public sealed class CollectionService
         return collection;
     }
 
+    /// <summary>
+    /// Обновляет существующую коллекцию.
+    /// </summary>
+    /// <param name="collection">Коллекция с обновлёнными данными.</param>
     public void Update(BookCollection collection)
     {
+        ArgumentNullException.ThrowIfNull(collection);
+
         var collections = Load().ToList();
 
         var existing = collections.FirstOrDefault(
@@ -103,11 +154,19 @@ public sealed class CollectionService
             return;
 
         existing.Name = collection.Name.Trim();
-        existing.BookIds = collection.BookIds.Distinct().ToList();
+
+        existing.BookIds = collection.BookIds
+            .Distinct()
+            .ToList();
 
         Save(collections);
     }
 
+    /// <summary>
+    /// Удаляет коллекцию по её идентификатору.
+    /// Удаление коллекции не удаляет сами книги из библиотеки.
+    /// </summary>
+    /// <param name="collectionId">Идентификатор удаляемой коллекции.</param>
     public void Delete(Guid collectionId)
     {
         var collections = Load().ToList();
@@ -119,10 +178,15 @@ public sealed class CollectionService
             return;
 
         collections.Remove(collection);
-
         Save(collections);
     }
 
+    /// <summary>
+    /// Добавляет книгу в указанную коллекцию.
+    /// Если книга уже находится в коллекции, операция игнорируется.
+    /// </summary>
+    /// <param name="collectionId">Идентификатор коллекции.</param>
+    /// <param name="bookId">Идентификатор добавляемой книги.</param>
     public void AddBook(Guid collectionId, Guid bookId)
     {
         var collections = Load().ToList();
@@ -141,6 +205,11 @@ public sealed class CollectionService
         Save(collections);
     }
 
+    /// <summary>
+    /// Удаляет книгу из указанной коллекции.
+    /// </summary>
+    /// <param name="collectionId">Идентификатор коллекции.</param>
+    /// <param name="bookId">Идентификатор удаляемой книги.</param>
     public void RemoveBook(Guid collectionId, Guid bookId)
     {
         var collections = Load().ToList();

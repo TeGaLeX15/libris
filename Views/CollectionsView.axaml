@@ -10,7 +10,9 @@
     xmlns:vm="using:Libris.ViewModels"
     x:DataType="vm:CollectionsViewModel">
 
+    <!--  Ресурсы представления  -->
     <UserControl.Resources>
+        <!--  Конвертер для отображения обложек книг  -->
         <converters:BookCoverConverter x:Key="BookCoverConverter" />
     </UserControl.Resources>
 
@@ -19,7 +21,7 @@
         RowDefinitions="Auto,*"
         RowSpacing="24">
 
-        <!--  Page header  -->
+        <!--  Заголовок страницы  -->
         <Grid
             Grid.Row="0"
             ColumnDefinitions="*,Auto"
@@ -37,7 +39,7 @@
                     Text="Organize your books into personal collections." />
             </StackPanel>
 
-            <!--  Create  -->
+            <!--  Создание новой коллекции  -->
             <Grid
                 Grid.Column="1"
                 VerticalAlignment="Center"
@@ -61,13 +63,13 @@
             </Grid>
         </Grid>
 
-        <!--  Main content  -->
+        <!--  Основное содержимое страницы  -->
         <Grid
             Grid.Row="1"
             ColumnDefinitions="220,*"
             ColumnSpacing="22">
 
-            <!--  Empty state  -->
+            <!--  Состояние при отсутствии коллекций  -->
             <StackPanel
                 Grid.ColumnSpan="2"
                 HorizontalAlignment="Center"
@@ -89,7 +91,7 @@
                     TextAlignment="Center" />
             </StackPanel>
 
-            <!--  Sidebar  -->
+            <!--  Боковая панель со списком коллекций  -->
             <suki:GlassCard
                 Grid.Column="0"
                 Padding="10"
@@ -98,6 +100,7 @@
 
                 <Grid RowDefinitions="Auto,*">
 
+                    <!--  Заголовок списка коллекций  -->
                     <Grid Margin="10,6,10,12" ColumnDefinitions="*,Auto">
 
                         <TextBlock
@@ -105,6 +108,7 @@
                             FontWeight="SemiBold"
                             Text="Collections" />
 
+                        <!--  Количество коллекций  -->
                         <TextBlock
                             Grid.Column="1"
                             FontSize="12"
@@ -112,6 +116,7 @@
                             Text="{Binding Collections.Count}" />
                     </Grid>
 
+                    <!--  Список коллекций  -->
                     <ListBox
                         Grid.Row="1"
                         Background="Transparent"
@@ -122,6 +127,7 @@
                         <ListBox.ItemTemplate>
                             <DataTemplate x:DataType="models:BookCollection">
 
+                                <!--  Элемент списка коллекций  -->
                                 <Border
                                     Margin="0,2"
                                     Padding="12,10"
@@ -131,6 +137,7 @@
 
                                         <TextBlock Text="{Binding Name}" TextTrimming="CharacterEllipsis" />
 
+                                        <!--  Количество книг в коллекции  -->
                                         <TextBlock
                                             Grid.Column="1"
                                             FontSize="11"
@@ -138,27 +145,26 @@
                                             Text="{Binding BookIds.Count}" />
                                     </Grid>
                                 </Border>
-
                             </DataTemplate>
                         </ListBox.ItemTemplate>
                     </ListBox>
                 </Grid>
             </suki:GlassCard>
 
-            <!--  Selected collection  -->
+            <!--  Содержимое выбранной коллекции  -->
             <Grid
                 Grid.Column="1"
                 IsVisible="{Binding !IsEmpty}"
                 RowDefinitions="Auto,Auto,*"
                 RowSpacing="18">
 
-                <!--  Collection header  -->
+                <!--  Заголовок выбранной коллекции  -->
                 <Grid
                     Grid.Row="0"
                     ColumnDefinitions="*,Auto"
                     ColumnSpacing="16">
 
-                    <!--  Normal title  -->
+                    <!--  Название коллекции  -->
                     <StackPanel
                         Grid.Column="0"
                         IsVisible="{Binding !IsRenaming}"
@@ -169,13 +175,14 @@
                             FontWeight="SemiBold"
                             Text="{Binding SelectedCollection.Name}" />
 
+                        <!--  Количество книг в выбранной коллекции  -->
                         <TextBlock
                             FontSize="13"
                             Opacity="0.5"
                             Text="{Binding CollectionBooks.Count, StringFormat='{}{0} books'}" />
                     </StackPanel>
 
-                    <!--  Rename editor  -->
+                    <!--  Редактор названия коллекции  -->
                     <Grid
                         Grid.Column="0"
                         ColumnDefinitions="*,Auto,Auto"
@@ -188,6 +195,7 @@
                             CornerRadius="8"
                             Text="{Binding RenameCollectionName, Mode=TwoWay}" />
 
+                        <!--  Сохранить новое название  -->
                         <Button
                             Grid.Column="1"
                             Padding="13,8"
@@ -195,6 +203,7 @@
                             Command="{Binding RenameCollectionCommand}"
                             Content="Save" />
 
+                        <!--  Отменить переименование  -->
                         <Button
                             Grid.Column="2"
                             Padding="13,8"
@@ -203,7 +212,7 @@
                             Content="Cancel" />
                     </Grid>
 
-                    <!--  Actions  -->
+                    <!--  Действия над коллекцией  -->
                     <StackPanel
                         Grid.Column="1"
                         VerticalAlignment="Center"
@@ -211,18 +220,21 @@
                         Orientation="Horizontal"
                         Spacing="7">
 
+                        <!--  Открыть/закрыть панель добавления книг  -->
                         <Button
                             Padding="14,8"
                             Classes="Outlined Rounded"
                             Command="{Binding ToggleAddBooksCommand}"
                             Content="{Binding AddBooksButtonText}" />
 
+                        <!--  Переименовать коллекцию  -->
                         <Button
                             Padding="14,8"
                             Classes="Flat Rounded"
                             Command="{Binding StartRenameCommand}"
                             Content="Rename" />
 
+                        <!--  Удалить коллекцию  -->
                         <Button
                             Padding="14,8"
                             Classes="Flat Rounded"
@@ -231,7 +243,7 @@
                     </StackPanel>
                 </Grid>
 
-                <!--  Add books  -->
+                <!--  Панель добавления книг в коллекцию  -->
                 <suki:GlassCard
                     Grid.Row="1"
                     Padding="14"
@@ -240,7 +252,7 @@
 
                     <Grid RowDefinitions="Auto,*" RowSpacing="12">
 
-                        <!--  Search  -->
+                        <!--  Поиск книг  -->
                         <TextBox
                             Grid.Row="0"
                             Padding="11,8"
@@ -248,7 +260,7 @@
                             PlaceholderText="Search by title or author..."
                             Text="{Binding BookSearchQuery, Mode=TwoWay}" />
 
-                        <!--  Available books  -->
+                        <!--  Доступные для добавления книги  -->
                         <Grid Grid.Row="1">
 
                             <ScrollViewer
@@ -262,6 +274,7 @@
                                     <ItemsControl.ItemTemplate>
                                         <DataTemplate>
 
+                                            <!--  Книга, доступная для добавления  -->
                                             <Border
                                                 Margin="0,2"
                                                 Padding="9"
@@ -269,6 +282,7 @@
 
                                                 <Grid ColumnDefinitions="*,Auto" ColumnSpacing="12">
 
+                                                    <!--  Информация о книге  -->
                                                     <StackPanel Grid.Column="0" Spacing="2">
 
                                                         <TextBlock
@@ -284,6 +298,7 @@
                                                             TextTrimming="CharacterEllipsis" />
                                                     </StackPanel>
 
+                                                    <!--  Добавить книгу  -->
                                                     <Button
                                                         Grid.Column="1"
                                                         Padding="13,7"
@@ -293,12 +308,12 @@
                                                         Content="Add" />
                                                 </Grid>
                                             </Border>
-
                                         </DataTemplate>
                                     </ItemsControl.ItemTemplate>
                                 </ItemsControl>
                             </ScrollViewer>
 
+                            <!--  Состояние при отсутствии доступных книг  -->
                             <StackPanel
                                 HorizontalAlignment="Center"
                                 VerticalAlignment="Center"
@@ -321,7 +336,7 @@
                     </Grid>
                 </suki:GlassCard>
 
-                <!--  Collection books  -->
+                <!--  Книги выбранной коллекции  -->
                 <ScrollViewer
                     Grid.Row="2"
                     HorizontalScrollBarVisibility="Disabled"
@@ -329,24 +344,25 @@
 
                     <Grid Margin="2">
 
-                        <!--  Books  -->
+                        <!--  Сетка книг  -->
                         <ItemsControl IsVisible="{Binding HasCollectionBooks}" ItemsSource="{Binding CollectionBooks}">
 
                             <ItemsControl.ItemsPanel>
                                 <ItemsPanelTemplate>
 
+                                    <!--  Адаптивная сетка карточек  -->
                                     <controls:ResponsiveWrapPanel
                                         HorizontalSpacing="18"
                                         ItemHeight="326"
                                         ItemWidth="184"
                                         VerticalSpacing="20" />
-
                                 </ItemsPanelTemplate>
                             </ItemsControl.ItemsPanel>
 
                             <ItemsControl.ItemTemplate>
                                 <DataTemplate>
 
+                                    <!--  Карточка книги  -->
                                     <suki:GlassCard
                                         Width="184"
                                         Height="326"
@@ -356,7 +372,7 @@
 
                                         <Grid RowDefinitions="218,*">
 
-                                            <!--  Clickable book content  -->
+                                            <!--  Обложка книги  -->
                                             <Button
                                                 Grid.Row="0"
                                                 Padding="0"
@@ -369,16 +385,16 @@
 
                                                     <Image Source="{Binding CoverPath, Converter={StaticResource BookCoverConverter}}" Stretch="UniformToFill" />
                                                 </Border>
-
                                             </Button>
 
-                                            <!--  Info  -->
+                                            <!--  Информация и действия  -->
                                             <Grid
                                                 Grid.Row="1"
                                                 Margin="11,9,11,10"
                                                 RowDefinitions="*,Auto"
                                                 RowSpacing="6">
 
+                                                <!--  Название и автор  -->
                                                 <Button
                                                     Grid.Row="0"
                                                     Padding="0"
@@ -403,10 +419,10 @@
                                                             Opacity="0.5"
                                                             Text="{Binding Author}"
                                                             TextTrimming="CharacterEllipsis" />
-
                                                     </StackPanel>
                                                 </Button>
 
+                                                <!--  Удалить книгу из коллекции  -->
                                                 <Button
                                                     Grid.Row="1"
                                                     Padding="7,5"
@@ -414,18 +430,14 @@
                                                     Command="{Binding $parent[ItemsControl].DataContext.RemoveBookCommand}"
                                                     CommandParameter="{Binding}"
                                                     Content="Remove" />
-
                                             </Grid>
                                         </Grid>
-
                                     </suki:GlassCard>
-
                                 </DataTemplate>
                             </ItemsControl.ItemTemplate>
-
                         </ItemsControl>
 
-                        <!--  Empty collection  -->
+                        <!--  Состояние пустой коллекции  -->
                         <StackPanel
                             Margin="0,50,0,0"
                             HorizontalAlignment="Center"
@@ -444,6 +456,7 @@
                                 Opacity="0.5"
                                 Text="Add books from your library to get started." />
 
+                            <!--  Открыть панель добавления книг  -->
                             <Button
                                 Margin="0,6,0,0"
                                 Padding="15,8"
@@ -452,10 +465,8 @@
                                 Command="{Binding ToggleAddBooksCommand}"
                                 Content="Add books" />
                         </StackPanel>
-
                     </Grid>
                 </ScrollViewer>
-
             </Grid>
         </Grid>
     </Grid>

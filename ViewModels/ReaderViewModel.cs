@@ -6,11 +6,22 @@ using Libris.Models;
 
 namespace Libris.ViewModels;
 
+/// <summary>
+/// ViewModel режима чтения выбранной книги.
+/// Отвечает за отображение книги, параметры чтения и прогресс.
+/// </summary>
 public partial class ReaderViewModel : ObservableObject
 {
     private readonly Book _book;
     private readonly Action? _closeReader;
 
+    /// <summary>
+    /// Создаёт ViewModel режима чтения.
+    /// </summary>
+    /// <param name="book">Книга, открытая для чтения.</param>
+    /// <param name="closeReader">
+    /// Действие, вызываемое при закрытии режима чтения.
+    /// </param>
     public ReaderViewModel(
         Book book,
         Action? closeReader = null)
@@ -21,18 +32,33 @@ public partial class ReaderViewModel : ObservableObject
         ReadingWidth = 760;
         FontSize = 18;
         LineHeight = 1.6;
-
-        UpdateProgressText();
     }
 
+    /// <summary>
+    /// Книга, открытая в режиме чтения.
+    /// </summary>
     public Book Book => _book;
 
+    /// <summary>
+    /// Название открытой книги.
+    /// </summary>
     public string Title => _book.Title;
 
+    /// <summary>
+    /// Автор открытой книги.
+    /// </summary>
     public string Author => _book.Author;
 
+    /// <summary>
+    /// Путь к обложке открытой книги.
+    /// </summary>
     public string? CoverPath => _book.CoverPath;
 
+    /// <summary>
+    /// Содержимое книги, отображаемое в режиме чтения.
+    /// Временно содержит демонстрационный текст.
+    /// В дальнейшем здесь будет загружаться содержимое выбранной книги.
+    /// </summary>
     public string Content { get; } = """
         Chapter One
 
@@ -45,6 +71,7 @@ public partial class ReaderViewModel : ObservableObject
         He opened the book again and continued reading.
 
         Every page brought another detail into the story.
+
         The characters became more familiar, the world around
         them more believable, and the distance between the reader
         and the story gradually disappeared.
@@ -55,26 +82,38 @@ public partial class ReaderViewModel : ObservableObject
         book and render it according to the selected reading settings.
         """;
 
+    /// <summary>
+    /// Максимальная ширина области текста при чтении.
+    /// </summary>
     [ObservableProperty]
-    private double _readingWidth;
+    private double readingWidth;
 
+    /// <summary>
+    /// Размер шрифта текста книги.
+    /// </summary>
     [ObservableProperty]
-    private double _fontSize;
+    private double fontSize;
 
+    /// <summary>
+    /// Межстрочный интервал текста книги.
+    /// </summary>
     [ObservableProperty]
-    private double _lineHeight;
+    private double lineHeight;
 
+    /// <summary>
+    /// Текущий прогресс чтения книги от 0 до 1.
+    /// </summary>
     public double Progress
     {
         get => _book.Progress;
         set
         {
-            var valueClamped = Math.Clamp(value, 0.0, 1.0);
+            var clampedValue = Math.Clamp(value, 0.0, 1.0);
 
-            if (Math.Abs(_book.Progress - valueClamped) < 0.001)
+            if (Math.Abs(_book.Progress - clampedValue) < 0.001)
                 return;
 
-            _book.Progress = valueClamped;
+            _book.Progress = clampedValue;
 
             OnPropertyChanged();
             OnPropertyChanged(nameof(ProgressText));
@@ -82,48 +121,43 @@ public partial class ReaderViewModel : ObservableObject
         }
     }
 
+    /// <summary>
+    /// Текущий прогресс чтения в процентном формате.
+    /// </summary>
     public string ProgressText =>
         $"{Math.Round(Progress * 100):0}%";
 
+    /// <summary>
+    /// Текущая позиция чтения.
+    /// Временный вариант до реализации реальной пагинации.
+    /// </summary>
     public string PositionText =>
         $"Page 1 • {ProgressText}";
 
+    /// <summary>
+    /// Закрывает режим чтения.
+    /// </summary>
     [RelayCommand]
     private void Close()
     {
         _closeReader?.Invoke();
     }
 
+    /// <summary>
+    /// Переходит на предыдущую страницу книги.
+    /// </summary>
     [RelayCommand]
     private void PreviousPage()
     {
-        // TODO: перейти на предыдущую страницу.
+        // TODO: Реализовать переход на предыдущую страницу.
     }
 
+    /// <summary>
+    /// Переходит на следующую страницу книги.
+    /// </summary>
     [RelayCommand]
     private void NextPage()
     {
-        // TODO: перейти на следующую страницу.
-    }
-
-    partial void OnReadingWidthChanged(double value)
-    {
-        OnPropertyChanged(nameof(ReadingWidth));
-    }
-
-    partial void OnFontSizeChanged(double value)
-    {
-        OnPropertyChanged(nameof(FontSize));
-    }
-
-    partial void OnLineHeightChanged(double value)
-    {
-        OnPropertyChanged(nameof(LineHeight));
-    }
-
-    private void UpdateProgressText()
-    {
-        OnPropertyChanged(nameof(ProgressText));
-        OnPropertyChanged(nameof(PositionText));
+        // TODO: Реализовать переход на следующую страницу.
     }
 }

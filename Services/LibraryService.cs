@@ -4,14 +4,20 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Security.Cryptography;
-using System.Threading.Tasks;
 using System.Text.Json;
+using System.Threading.Tasks;
+
 using Libris.Models;
 
 namespace Libris.Services;
 
+/// <summary>
+/// Отвечает за хранение библиотеки книг, импорт и удаление книг,
+/// а также сохранение связанных с книгами файлов и обложек.
+/// </summary>
 public sealed class LibraryService
 {
+    private const string LibraryDirectoryName = "Libris";
     private const string BooksFolderName = "Books";
     private const string CoversFolderName = "Covers";
     private const string LibraryFileName = "library.json";
@@ -21,18 +27,27 @@ public sealed class LibraryService
     private readonly string _coversDirectory;
     private readonly string _libraryFile;
 
+    private readonly BookMetadataService _metadataService;
+
+    /// <summary>
+    /// Настройки сериализации библиотеки.
+    /// </summary>
     private static readonly JsonSerializerOptions JsonOptions = new()
     {
         WriteIndented = true,
         PropertyNameCaseInsensitive = true
     };
 
+    /// <summary>
+    /// Инициализирует сервис библиотеки и определяет
+    /// расположение файлов приложения.
+    /// </summary>
     public LibraryService()
     {
         _libraryDirectory = Path.Combine(
             Environment.GetFolderPath(
                 Environment.SpecialFolder.ApplicationData),
-            "Libris");
+            LibraryDirectoryName);
 
         _booksDirectory = Path.Combine(
             _libraryDirectory,
@@ -45,8 +60,17 @@ public sealed class LibraryService
         _libraryFile = Path.Combine(
             _libraryDirectory,
             LibraryFileName);
+
+        _metadataService = new BookMetadataService();
     }
 
+    /// <summary>
+    /// Загружает все книги из локального хранилища библиотеки.
+    /// </summary>
+    /// <returns>
+    /// Список сохранённых книг или пустой список,
+    /// если библиотека отсутствует или её невозможно прочитать.
+    /// </returns>
     public IReadOnlyList<Book> Load()
     {
         try
@@ -61,14 +85,31 @@ public sealed class LibraryService
                        JsonOptions)
                    ?? [];
         }
-        catch
+        catch (JsonException)
         {
+            // Повреждённый JSON не должен приводить к падению приложения.
+            return [];
+        }
+        catch (IOException)
+        {
+            // Ошибка чтения файла не должна приводить к падению приложения.
+            return [];
+        }
+        catch (UnauthorizedAccessException)
+        {
+            // Отсутствие доступа к файлу не должно приводить к падению приложения.
             return [];
         }
     }
 
+    /// <summary>
+    /// Сохраняет переданный список книг в локальное хранилище.
+    /// </summary>
+    /// <param name="books">Книги для сохранения.</param>
     public void Save(IEnumerable<Book> books)
     {
+        ArgumentNullException.ThrowIfNull(books);
+
         try
         {
             Directory.CreateDirectory(_libraryDirectory);
@@ -81,26 +122,43 @@ public sealed class LibraryService
                 _libraryFile,
                 json);
         }
-        catch
+        catch (IOException)
         {
-            // Library persistence should never crash the application.
+            // Ошибка записи библиотеки не должна приводить к падению приложения.
+        }
+        catch (UnauthorizedAccessException)
+        {
+            // Отсутствие доступа к файлу не должно приводить к падению приложения.
         }
     }
 
+    /// <summary>
+    /// Импортирует книгу в библиотеку.
+    /// Создаёт управляемую копию файла, извлекает метаданные
+    /// и сохраняет обложку, если она доступна.
+    /// </summary>
+    /// <param name="sourceFilePath">
+    /// Путь к исходному файлу книги.
+    /// </param>
+    /// <returns>
+    /// Импортированная книга или <see langword="null"/>,
+    /// если файл невозможно импортировать или такая книга уже существует.
+    /// </returns>
     public async Task<Book?> ImportAsync(string sourceFilePath)
     {
+        if (string.IsNullOrWhiteSpace(sourceFilePath))
+            return null;
+
+        if (!File.Exists(sourceFilePath))
+            return null;
+
         try
         {
-            if (string.IsNullOrWhiteSpace(sourceFilePath))
-                return null;
-
-            if (!File.Exists(sourceFilePath))
-                return null;
-
             var fileHash = CalculateFileHash(sourceFilePath);
+            var books = Load();
 
-            var books = Load().ToList();
-
+            // Не добавляем книгу, если файл с таким же содержимым
+            // уже присутствует в библиотеке.
             var existingBook = books.FirstOrDefault(book =>
                 !string.IsNullOrWhiteSpace(book.FileHash) &&
                 string.Equals(
@@ -111,9 +169,7 @@ public sealed class LibraryService
             if (existingBook is not null)
                 return null;
 
-            var metadataService = new BookMetadataService();
-
-            var metadata = await metadataService.ReadAsync(
+            var metadata = await _metadataService.ReadAsync(
                 sourceFilePath);
 
             Directory.CreateDirectory(_booksDirectory);
@@ -148,18 +204,36 @@ public sealed class LibraryService
                     metadata.CoverBytes);
             }
 
-            books.Add(book);
+            var updatedBooks = books.ToList();
+            updatedBooks.Add(book);
 
-            Save(books);
+            Save(updatedBooks);
 
             return book;
         }
-        catch
+        catch (IOException)
         {
+            // Ошибки работы с файлами не должны приводить к падению приложения.
+            return null;
+        }
+        catch (UnauthorizedAccessException)
+        {
+            // Отсутствие доступа к файлам не должно приводить к падению приложения.
+            return null;
+        }
+        catch (JsonException)
+        {
+            // Ошибки чтения или сериализации данных не должны приводить
+            // к падению приложения.
             return null;
         }
     }
 
+    /// <summary>
+    /// Удаляет книгу из библиотеки и удаляет её управляемую копию
+    /// и сохранённую обложку.
+    /// </summary>
+    /// <param name="id">Идентификатор удаляемой книги.</param>
     public void Remove(Guid id)
     {
         var books = Load().ToList();
@@ -170,30 +244,32 @@ public sealed class LibraryService
         if (book is null)
             return;
 
-        books.Remove(book);
-
         try
         {
-            if (!string.IsNullOrWhiteSpace(book.FilePath) &&
-                File.Exists(book.FilePath))
-            {
-                File.Delete(book.FilePath);
-            }
-
-            if (!string.IsNullOrWhiteSpace(book.CoverPath) &&
-                File.Exists(book.CoverPath))
-            {
-                File.Delete(book.CoverPath);
-            }
+            DeleteFileIfExists(book.FilePath);
+            DeleteFileIfExists(book.CoverPath);
         }
-        catch
+        catch (IOException)
         {
-            // Removing a library entry should not crash the application.
+            // Ошибка удаления связанных файлов не должна приводить
+            // к падению приложения.
+        }
+        catch (UnauthorizedAccessException)
+        {
+            // Отсутствие доступа к файлам не должно приводить
+            // к падению приложения.
         }
 
+        books.Remove(book);
         Save(books);
     }
 
+    /// <summary>
+    /// Сохраняет обложку книги в локальное хранилище.
+    /// </summary>
+    /// <param name="bookId">Идентификатор книги.</param>
+    /// <param name="coverBytes">Данные изображения обложки.</param>
+    /// <returns>Полный путь к сохранённому файлу обложки.</returns>
     private string SaveCover(
         Guid bookId,
         byte[] coverBytes)
@@ -211,8 +287,28 @@ public sealed class LibraryService
         return coverPath;
     }
 
-    private static string CalculateFileHash(
-        string filePath)
+    /// <summary>
+    /// Удаляет файл, если путь указан и файл существует.
+    /// </summary>
+    /// <param name="filePath">Путь к удаляемому файлу.</param>
+    private static void DeleteFileIfExists(string? filePath)
+    {
+        if (string.IsNullOrWhiteSpace(filePath))
+            return;
+
+        if (!File.Exists(filePath))
+            return;
+
+        File.Delete(filePath);
+    }
+
+    /// <summary>
+    /// Вычисляет SHA-256 хеш содержимого файла.
+    /// Используется для обнаружения дубликатов книг.
+    /// </summary>
+    /// <param name="filePath">Путь к файлу.</param>
+    /// <returns>SHA-256 хеш в виде шестнадцатеричной строки.</returns>
+    private static string CalculateFileHash(string filePath)
     {
         using var stream = File.OpenRead(filePath);
         using var sha256 = SHA256.Create();

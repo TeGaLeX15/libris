@@ -7,58 +7,53 @@
     xmlns:vm="using:Libris.ViewModels"
     x:DataType="vm:SettingsViewModel">
 
+    <UserControl.Styles>
+        <!--  Общий стиль описания настройки  -->
+        <Style Selector="StackPanel.setting-description">
+            <Setter Property="Spacing" Value="4" />
+        </Style>
+
+        <!--  Общий стиль названия настройки  -->
+        <Style Selector="TextBlock.setting-title">
+            <Setter Property="FontSize" Value="15" />
+            <Setter Property="FontWeight" Value="SemiBold" />
+        </Style>
+
+        <!--  Общий стиль пояснения настройки  -->
+        <Style Selector="TextBlock.setting-hint">
+            <Setter Property="Opacity" Value="0.6" />
+        </Style>
+    </UserControl.Styles>
+
     <Grid Margin="28,24,28,32">
-        <ScrollViewer
-            HorizontalScrollBarVisibility="Disabled"
-            VerticalScrollBarVisibility="Auto">
+        <ScrollViewer HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto">
 
-            <StackPanel
-                HorizontalAlignment="Stretch"
-                Spacing="28">
+            <StackPanel Spacing="28">
 
-                <!-- Header -->
+                <!--  Заголовок страницы  -->
                 <StackPanel Spacing="6">
                     <TextBlock
                         FontSize="32"
                         FontWeight="SemiBold"
                         Text="Settings" />
-
-                    <TextBlock
-                        Opacity="0.6"
-                        Text="Customize your Libris experience." />
+                    <TextBlock Opacity="0.6" Text="Customize your Libris experience." />
                 </StackPanel>
 
-                <!-- Appearance -->
+                <!--  Внешний вид  -->
                 <StackPanel Spacing="12">
-
                     <TextBlock
                         FontSize="20"
                         FontWeight="SemiBold"
                         Text="Appearance" />
 
-                    <suki:GlassCard
-                        Padding="24"
-                        IsAnimated="True">
-
+                    <suki:GlassCard Padding="24" IsAnimated="True">
                         <StackPanel Spacing="20">
 
-                            <!-- Theme -->
-                            <Grid
-                                ColumnDefinitions="*,Auto"
-                                ColumnSpacing="32">
-
-                                <StackPanel
-                                    Grid.Column="0"
-                                    Spacing="4">
-
-                                    <TextBlock
-                                        FontSize="15"
-                                        FontWeight="SemiBold"
-                                        Text="Theme" />
-
-                                    <TextBlock
-                                        Opacity="0.6"
-                                        Text="Choose how Libris should look." />
+                            <!--  Тема  -->
+                            <Grid ColumnDefinitions="*,Auto" ColumnSpacing="32">
+                                <StackPanel Classes="setting-description">
+                                    <TextBlock Classes="setting-title" Text="Theme" />
+                                    <TextBlock Classes="setting-hint" Text="Choose how Libris should look." />
                                 </StackPanel>
 
                                 <ComboBox
@@ -68,23 +63,11 @@
                                     SelectedItem="{Binding Theme}" />
                             </Grid>
 
-                            <!-- Accent Color -->
-                            <Grid
-                                ColumnDefinitions="*,Auto"
-                                ColumnSpacing="32">
-
-                                <StackPanel
-                                    Grid.Column="0"
-                                    Spacing="4">
-
-                                    <TextBlock
-                                        FontSize="15"
-                                        FontWeight="SemiBold"
-                                        Text="Accent Color" />
-
-                                    <TextBlock
-                                        Opacity="0.6"
-                                        Text="Choose the application's accent color." />
+                            <!--  Акцентный цвет  -->
+                            <Grid ColumnDefinitions="*,Auto" ColumnSpacing="32">
+                                <StackPanel Classes="setting-description">
+                                    <TextBlock Classes="setting-title" Text="Accent Color" />
+                                    <TextBlock Classes="setting-hint" Text="Choose the application's accent color." />
                                 </StackPanel>
 
                                 <ComboBox
@@ -98,37 +81,21 @@
                     </suki:GlassCard>
                 </StackPanel>
 
-                <!-- Reading -->
+                <!--  Чтение  -->
                 <StackPanel Spacing="12">
-
                     <TextBlock
                         FontSize="20"
                         FontWeight="SemiBold"
                         Text="Reading" />
 
-                    <suki:GlassCard
-                        Padding="24"
-                        IsAnimated="True">
-
+                    <suki:GlassCard Padding="24" IsAnimated="True">
                         <StackPanel Spacing="20">
 
-                            <!-- Default Font -->
-                            <Grid
-                                ColumnDefinitions="*,Auto"
-                                ColumnSpacing="32">
-
-                                <StackPanel
-                                    Grid.Column="0"
-                                    Spacing="4">
-
-                                    <TextBlock
-                                        FontSize="15"
-                                        FontWeight="SemiBold"
-                                        Text="Default Font" />
-
-                                    <TextBlock
-                                        Opacity="0.6"
-                                        Text="Font used when opening a book." />
+                            <!--  Шрифт  -->
+                            <Grid ColumnDefinitions="*,Auto" ColumnSpacing="32">
+                                <StackPanel Classes="setting-description">
+                                    <TextBlock Classes="setting-title" Text="Default Font" />
+                                    <TextBlock Classes="setting-hint" Text="Font used when opening a book." />
                                 </StackPanel>
 
                                 <ComboBox
@@ -138,23 +105,11 @@
                                     SelectedItem="{Binding DefaultFont}" />
                             </Grid>
 
-                            <!-- Font Size -->
-                            <Grid
-                                ColumnDefinitions="*,Auto"
-                                ColumnSpacing="32">
-
-                                <StackPanel
-                                    Grid.Column="0"
-                                    Spacing="4">
-
-                                    <TextBlock
-                                        FontSize="15"
-                                        FontWeight="SemiBold"
-                                        Text="Font Size" />
-
-                                    <TextBlock
-                                        Opacity="0.6"
-                                        Text="Default reading text size." />
+                            <!--  Размер шрифта  -->
+                            <Grid ColumnDefinitions="*,Auto" ColumnSpacing="32">
+                                <StackPanel Classes="setting-description">
+                                    <TextBlock Classes="setting-title" Text="Font Size" />
+                                    <TextBlock Classes="setting-hint" Text="Default reading text size." />
                                 </StackPanel>
 
                                 <NumericUpDown
@@ -166,23 +121,11 @@
                                     Value="{Binding FontSize}" />
                             </Grid>
 
-                            <!-- Line Spacing -->
-                            <Grid
-                                ColumnDefinitions="*,Auto"
-                                ColumnSpacing="32">
-
-                                <StackPanel
-                                    Grid.Column="0"
-                                    Spacing="4">
-
-                                    <TextBlock
-                                        FontSize="15"
-                                        FontWeight="SemiBold"
-                                        Text="Line Spacing" />
-
-                                    <TextBlock
-                                        Opacity="0.6"
-                                        Text="Space between lines of text." />
+                            <!--  Межстрочный интервал  -->
+                            <Grid ColumnDefinitions="*,Auto" ColumnSpacing="32">
+                                <StackPanel Classes="setting-description">
+                                    <TextBlock Classes="setting-title" Text="Line Spacing" />
+                                    <TextBlock Classes="setting-hint" Text="Space between lines of text." />
                                 </StackPanel>
 
                                 <NumericUpDown
@@ -194,23 +137,11 @@
                                     Value="{Binding LineSpacing}" />
                             </Grid>
 
-                            <!-- Reading Width -->
-                            <Grid
-                                ColumnDefinitions="*,Auto"
-                                ColumnSpacing="32">
-
-                                <StackPanel
-                                    Grid.Column="0"
-                                    Spacing="4">
-
-                                    <TextBlock
-                                        FontSize="15"
-                                        FontWeight="SemiBold"
-                                        Text="Reading Width" />
-
-                                    <TextBlock
-                                        Opacity="0.6"
-                                        Text="Maximum width of the reading area." />
+                            <!--  Ширина области чтения  -->
+                            <Grid ColumnDefinitions="*,Auto" ColumnSpacing="32">
+                                <StackPanel Classes="setting-description">
+                                    <TextBlock Classes="setting-title" Text="Reading Width" />
+                                    <TextBlock Classes="setting-hint" Text="Maximum width of the reading area." />
                                 </StackPanel>
 
                                 <NumericUpDown
@@ -226,37 +157,21 @@
                     </suki:GlassCard>
                 </StackPanel>
 
-                <!-- Library -->
+                <!--  Библиотека  -->
                 <StackPanel Spacing="12">
-
                     <TextBlock
                         FontSize="20"
                         FontWeight="SemiBold"
                         Text="Library" />
 
-                    <suki:GlassCard
-                        Padding="24"
-                        IsAnimated="True">
-
+                    <suki:GlassCard Padding="24" IsAnimated="True">
                         <StackPanel Spacing="20">
 
-                            <!-- Default Sorting -->
-                            <Grid
-                                ColumnDefinitions="*,Auto"
-                                ColumnSpacing="32">
-
-                                <StackPanel
-                                    Grid.Column="0"
-                                    Spacing="4">
-
-                                    <TextBlock
-                                        FontSize="15"
-                                        FontWeight="SemiBold"
-                                        Text="Default Sorting" />
-
-                                    <TextBlock
-                                        Opacity="0.6"
-                                        Text="How books are sorted by default." />
+                            <!--  Сортировка  -->
+                            <Grid ColumnDefinitions="*,Auto" ColumnSpacing="32">
+                                <StackPanel Classes="setting-description">
+                                    <TextBlock Classes="setting-title" Text="Default Sorting" />
+                                    <TextBlock Classes="setting-hint" Text="How books are sorted by default." />
                                 </StackPanel>
 
                                 <ComboBox
@@ -266,23 +181,11 @@
                                     SelectedItem="{Binding DefaultSorting}" />
                             </Grid>
 
-                            <!-- Show Progress -->
-                            <Grid
-                                ColumnDefinitions="*,Auto"
-                                ColumnSpacing="32">
-
-                                <StackPanel
-                                    Grid.Column="0"
-                                    Spacing="4">
-
-                                    <TextBlock
-                                        FontSize="15"
-                                        FontWeight="SemiBold"
-                                        Text="Show Progress" />
-
-                                    <TextBlock
-                                        Opacity="0.6"
-                                        Text="Display reading progress in the library." />
+                            <!--  Прогресс чтения  -->
+                            <Grid ColumnDefinitions="*,Auto" ColumnSpacing="32">
+                                <StackPanel Classes="setting-description">
+                                    <TextBlock Classes="setting-title" Text="Show Progress" />
+                                    <TextBlock Classes="setting-hint" Text="Display reading progress in the library." />
                                 </StackPanel>
 
                                 <ToggleSwitch
@@ -291,23 +194,11 @@
                                     IsChecked="{Binding ShowProgress}" />
                             </Grid>
 
-                            <!-- Cover Size -->
-                            <Grid
-                                ColumnDefinitions="*,Auto"
-                                ColumnSpacing="32">
-
-                                <StackPanel
-                                    Grid.Column="0"
-                                    Spacing="4">
-
-                                    <TextBlock
-                                        FontSize="15"
-                                        FontWeight="SemiBold"
-                                        Text="Cover Size" />
-
-                                    <TextBlock
-                                        Opacity="0.6"
-                                        Text="Default size of book covers." />
+                            <!--  Размер обложки  -->
+                            <Grid ColumnDefinitions="*,Auto" ColumnSpacing="32">
+                                <StackPanel Classes="setting-description">
+                                    <TextBlock Classes="setting-title" Text="Cover Size" />
+                                    <TextBlock Classes="setting-hint" Text="Default size of book covers." />
                                 </StackPanel>
 
                                 <NumericUpDown

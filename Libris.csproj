@@ -1,44 +1,30 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-
     <PropertyGroup>
         <OutputType>WinExe</OutputType>
         <TargetFramework>net10.0</TargetFramework>
-
         <Nullable>enable</Nullable>
-
         <ApplicationManifest>app.manifest</ApplicationManifest>
-
         <AvaloniaUseCompiledBindingsByDefault>true</AvaloniaUseCompiledBindingsByDefault>
     </PropertyGroup>
 
+    <!-- Ресурсы приложения -->
     <ItemGroup>
         <AvaloniaResource Include="Assets\**" />
     </ItemGroup>
 
+    <!-- Зависимости приложения -->
     <ItemGroup>
-
         <PackageReference Include="Avalonia" Version="12.1.1" />
-
         <PackageReference Include="Avalonia.Desktop" Version="12.1.1" />
-
         <PackageReference Include="Avalonia.Fonts.Inter" Version="12.1.1" />
 
         <PackageReference Include="AvaloniaUI.DiagnosticsSupport" Version="2.2.3">
-            <IncludeAssets Condition="'$(Configuration)' != 'Debug'">
-                None
-            </IncludeAssets>
-
-            <PrivateAssets Condition="'$(Configuration)' != 'Debug'">
-                All
-            </PrivateAssets>
+            <IncludeAssets Condition="'$(Configuration)' != 'Debug'">None</IncludeAssets>
+            <PrivateAssets Condition="'$(Configuration)' != 'Debug'">All</PrivateAssets>
         </PackageReference>
 
         <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.2" />
-
         <PackageReference Include="SukiUI" Version="7.0.1" />
-
         <PackageReference Include="VersOne.Epub" Version="3.3.6" />
-
     </ItemGroup>
-
 </Project>

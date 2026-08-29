@@ -1,4 +1,5 @@
 // ViewModels/SettingsViewModel.cs
+using System;
 using System.Collections.Generic;
 using Avalonia.Styling;
 using CommunityToolkit.Mvvm.ComponentModel;
@@ -11,8 +12,6 @@ namespace Libris.ViewModels;
 
 /// <summary>
 /// ViewModel страницы настроек приложения.
-/// Отвечает за управление пользовательскими настройками,
-/// их сохранение и применение визуальной темы Libris.
 /// </summary>
 public partial class SettingsViewModel : ViewModelBase
 {
@@ -31,7 +30,7 @@ public partial class SettingsViewModel : ViewModelBase
     ];
 
     /// <summary>
-    /// Доступные цвета акцента приложения.
+    /// Доступные цвета акцента.
     /// </summary>
     public IReadOnlyList<string> AvailableAccentColors { get; } =
     [
@@ -42,7 +41,7 @@ public partial class SettingsViewModel : ViewModelBase
     ];
 
     /// <summary>
-    /// Доступные шрифты для режима чтения.
+    /// Доступные шрифты режима чтения.
     /// </summary>
     public IReadOnlyList<string> AvailableFonts { get; } =
     [
@@ -53,7 +52,7 @@ public partial class SettingsViewModel : ViewModelBase
     ];
 
     /// <summary>
-    /// Доступные варианты сортировки книг по умолчанию.
+    /// Доступные варианты сортировки библиотеки.
     /// </summary>
     public IReadOnlyList<string> AvailableSortingOptions { get; } =
     [
@@ -63,182 +62,178 @@ public partial class SettingsViewModel : ViewModelBase
         "Progress"
     ];
 
-    /// <summary>
-    /// Текущая тема приложения.
-    /// </summary>
     [ObservableProperty]
     private string theme = "System";
 
-    /// <summary>
-    /// Текущий цвет акцента приложения.
-    /// </summary>
     [ObservableProperty]
     private string accentColor = "Blue";
 
-    /// <summary>
-    /// Шрифт, используемый по умолчанию в режиме чтения.
-    /// </summary>
     [ObservableProperty]
     private string defaultFont = "Inter";
 
-    /// <summary>
-    /// Размер шрифта в режиме чтения.
-    /// </summary>
     [ObservableProperty]
-    private double fontSize = 16;
+    private double fontSize = 18;
 
-    /// <summary>
-    /// Межстрочный интервал в режиме чтения.
-    /// </summary>
     [ObservableProperty]
-    private double lineSpacing = 1.5;
+    private double lineSpacing = 1.65;
 
-    /// <summary>
-    /// Максимальная ширина области текста в режиме чтения.
-    /// </summary>
     [ObservableProperty]
-    private double readingWidth = 800;
+    private double readingWidth = 760;
 
-    /// <summary>
-    /// Сортировка книг, используемая по умолчанию в библиотеке.
-    /// </summary>
     [ObservableProperty]
     private string defaultSorting = "Recently Added";
 
-    /// <summary>
-    /// Определяет, отображать ли прогресс чтения в интерфейсе библиотеки.
-    /// </summary>
     [ObservableProperty]
     private bool showProgress = true;
 
-    /// <summary>
-    /// Размер обложек книг в библиотеке.
-    /// </summary>
     [ObservableProperty]
     private double coverSize = 180;
 
     /// <summary>
-    /// Инициализирует ViewModel настроек и загружает сохранённые значения.
+    /// Создаёт ViewModel настроек и загружает сохранённые значения.
     /// </summary>
-    /// <param name="settingsService">
-    /// Сервис для загрузки и сохранения настроек.
-    /// </param>
     public SettingsViewModel(SettingsService settingsService)
     {
+        ArgumentNullException.ThrowIfNull(settingsService);
+
         _settingsService = settingsService;
         _settings = _settingsService.Load();
         _sukiTheme = SukiTheme.GetInstance();
 
-        Theme = _settings.Theme;
-        AccentColor = _settings.AccentColor;
-        DefaultFont = _settings.DefaultFont;
-        FontSize = _settings.FontSize;
-        LineSpacing = _settings.LineSpacing;
-        ReadingWidth = _settings.ReadingWidth;
-        DefaultSorting = _settings.DefaultSorting;
+        Theme = NormalizeTheme(_settings.Theme);
+        AccentColor = NormalizeAccentColor(_settings.AccentColor);
+        DefaultFont = NormalizeFont(_settings.DefaultFont);
+        FontSize = Math.Clamp(_settings.FontSize, 10, 48);
+        LineSpacing = Math.Clamp(_settings.LineSpacing, 1.0, 3.0);
+        ReadingWidth = Math.Clamp(_settings.ReadingWidth, 400, 1400);
+        DefaultSorting = NormalizeSorting(_settings.DefaultSorting);
         ShowProgress = _settings.ShowProgress;
-        CoverSize = _settings.CoverSize;
+        CoverSize = Math.Clamp(_settings.CoverSize, 100, 400);
 
         ApplyTheme(Theme);
         ApplyAccentColor(AccentColor);
     }
 
-    /// <summary>
-    /// Применяет новую тему и сохраняет настройку.
-    /// </summary>
-    /// <param name="value">Название выбранной темы.</param>
     partial void OnThemeChanged(string value)
     {
+        value = NormalizeTheme(value);
+
+        if (Theme != value)
+        {
+            Theme = value;
+            return;
+        }
+
         _settings.Theme = value;
         ApplyTheme(value);
         Save();
     }
 
-    /// <summary>
-    /// Применяет новый цвет акцента и сохраняет настройку.
-    /// </summary>
-    /// <param name="value">Название выбранного цвета.</param>
     partial void OnAccentColorChanged(string value)
     {
+        value = NormalizeAccentColor(value);
+
+        if (AccentColor != value)
+        {
+            AccentColor = value;
+            return;
+        }
+
         _settings.AccentColor = value;
         ApplyAccentColor(value);
         Save();
     }
 
-    /// <summary>
-    /// Сохраняет выбранный шрифт.
-    /// </summary>
-    /// <param name="value">Название шрифта.</param>
     partial void OnDefaultFontChanged(string value)
     {
+        value = NormalizeFont(value);
+
+        if (DefaultFont != value)
+        {
+            DefaultFont = value;
+            return;
+        }
+
         _settings.DefaultFont = value;
         Save();
     }
 
-    /// <summary>
-    /// Сохраняет размер шрифта.
-    /// </summary>
-    /// <param name="value">Размер шрифта.</param>
     partial void OnFontSizeChanged(double value)
     {
+        value = Math.Clamp(value, 10, 48);
+
+        if (Math.Abs(FontSize - value) > double.Epsilon)
+        {
+            FontSize = value;
+            return;
+        }
+
         _settings.FontSize = value;
         Save();
     }
 
-    /// <summary>
-    /// Сохраняет межстрочный интервал.
-    /// </summary>
-    /// <param name="value">Новое значение межстрочного интервала.</param>
     partial void OnLineSpacingChanged(double value)
     {
+        value = Math.Clamp(value, 1.0, 3.0);
+
+        if (Math.Abs(LineSpacing - value) > double.Epsilon)
+        {
+            LineSpacing = value;
+            return;
+        }
+
         _settings.LineSpacing = value;
         Save();
     }
 
-    /// <summary>
-    /// Сохраняет ширину области чтения.
-    /// </summary>
-    /// <param name="value">Новая ширина области чтения.</param>
     partial void OnReadingWidthChanged(double value)
     {
+        value = Math.Clamp(value, 400, 1400);
+
+        if (Math.Abs(ReadingWidth - value) > double.Epsilon)
+        {
+            ReadingWidth = value;
+            return;
+        }
+
         _settings.ReadingWidth = value;
         Save();
     }
 
-    /// <summary>
-    /// Сохраняет сортировку книг по умолчанию.
-    /// </summary>
-    /// <param name="value">Выбранный вариант сортировки.</param>
     partial void OnDefaultSortingChanged(string value)
     {
+        value = NormalizeSorting(value);
+
+        if (DefaultSorting != value)
+        {
+            DefaultSorting = value;
+            return;
+        }
+
         _settings.DefaultSorting = value;
         Save();
     }
 
-    /// <summary>
-    /// Сохраняет настройку отображения прогресса чтения.
-    /// </summary>
-    /// <param name="value">Определяет, отображать ли прогресс.</param>
     partial void OnShowProgressChanged(bool value)
     {
         _settings.ShowProgress = value;
         Save();
     }
 
-    /// <summary>
-    /// Сохраняет размер обложек книг.
-    /// </summary>
-    /// <param name="value">Новый размер обложек.</param>
     partial void OnCoverSizeChanged(double value)
     {
+        value = Math.Clamp(value, 100, 400);
+
+        if (Math.Abs(CoverSize - value) > double.Epsilon)
+        {
+            CoverSize = value;
+            return;
+        }
+
         _settings.CoverSize = value;
         Save();
     }
 
-    /// <summary>
-    /// Применяет выбранную тему через SukiUI.
-    /// </summary>
-    /// <param name="value">Название темы.</param>
     private void ApplyTheme(string value)
     {
         var theme = value switch
@@ -251,10 +246,6 @@ public partial class SettingsViewModel : ViewModelBase
         _sukiTheme.ChangeBaseTheme(theme);
     }
 
-    /// <summary>
-    /// Применяет выбранный цвет акцента через SukiUI.
-    /// </summary>
-    /// <param name="value">Название цвета.</param>
     private void ApplyAccentColor(string value)
     {
         var color = value switch
@@ -268,11 +259,51 @@ public partial class SettingsViewModel : ViewModelBase
         _sukiTheme.ChangeColorTheme(color);
     }
 
-    /// <summary>
-    /// Сохраняет текущие настройки на диск.
-    /// </summary>
     private void Save()
     {
         _settingsService.Save(_settings);
+    }
+
+    private static string NormalizeTheme(string? value)
+    {
+        return value switch
+        {
+            "Light" => "Light",
+            "Dark" => "Dark",
+            _ => "System"
+        };
+    }
+
+    private static string NormalizeAccentColor(string? value)
+    {
+        return value switch
+        {
+            "Red" => "Red",
+            "Green" => "Green",
+            "Orange" => "Orange",
+            _ => "Blue"
+        };
+    }
+
+    private static string NormalizeFont(string? value)
+    {
+        return value switch
+        {
+            "Arial" => "Arial",
+            "Georgia" => "Georgia",
+            "Times New Roman" => "Times New Roman",
+            _ => "Inter"
+        };
+    }
+
+    private static string NormalizeSorting(string? value)
+    {
+        return value switch
+        {
+            "Title" => "Title",
+            "Author" => "Author",
+            "Progress" => "Progress",
+            _ => "Recently Added"
+        };
     }
 }

@@ -9,13 +9,23 @@ namespace Libris;
 
 /// <summary>
 /// Представляет точку входа и корневой объект Avalonia-приложения Libris.
-/// Отвечает за загрузку XAML, инициализацию сервисов и создание главного окна.
+/// Отвечает за загрузку XAML, инициализацию сервисов
+/// и создание главного окна приложения.
 /// </summary>
 public partial class App : Application
 {
     /// <summary>
-    /// Загружает XAML-разметку приложения и связанные с ней ресурсы.
-    /// Вызывается Avalonia при запуске приложения.
+    /// Сервис пользовательских настроек приложения.
+    /// </summary>
+    public SettingsService SettingsService { get; private set; } = null!;
+
+    /// <summary>
+    /// Сервис хранения данных приложения.
+    /// </summary>
+    public AppDataService AppDataService { get; private set; } = null!;
+
+    /// <summary>
+    /// Загружает XAML-разметку приложения.
     /// </summary>
     public override void Initialize()
     {
@@ -23,27 +33,22 @@ public partial class App : Application
     }
 
     /// <summary>
-    /// Выполняет завершающую инициализацию приложения после запуска Avalonia.
-    /// Создаёт необходимые сервисы, загружает сохранённые данные
-    /// и устанавливает главное окно приложения для desktop-режима.
+    /// Выполняет инициализацию приложения после запуска Avalonia.
     /// </summary>
     public override void OnFrameworkInitializationCompleted()
     {
         if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
         {
-            // Создание сервисов, используемых ViewModel приложения.
-            var settingsService = new SettingsService();
-            var appDataService = new AppDataService();
+            SettingsService = new SettingsService();
+            AppDataService = new AppDataService();
 
-            // Загрузка сохранённых данных приложения.
-            var appData = appDataService.Load();
+            var appData = AppDataService.Load();
 
-            // Создание главного окна и передача корневой ViewModel.
             desktop.MainWindow = new MainWindow
             {
                 DataContext = new MainViewModel(
-                    settingsService,
-                    appDataService,
+                    SettingsService,
+                    AppDataService,
                     appData)
             };
         }

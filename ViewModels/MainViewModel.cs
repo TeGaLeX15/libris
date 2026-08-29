@@ -18,6 +18,7 @@ public partial class MainViewModel : ViewModelBase
     private const int AnimationSteps = 24;
     private const int AnimationDuration = 260;
 
+    private readonly SettingsService _settingsService;
     private readonly AppDataService _appDataService;
     private readonly AppData _appData;
 
@@ -88,6 +89,7 @@ public partial class MainViewModel : ViewModelBase
         AppDataService appDataService,
         AppData appData)
     {
+        _settingsService = settingsService;
         _appDataService = appDataService;
         _appData = appData;
 
@@ -133,6 +135,7 @@ public partial class MainViewModel : ViewModelBase
     private async Task OpenBookDetailsAsync(Book book)
     {
         BookDetails.Open(book);
+
         IsBookDetailsOpen = true;
 
         await AnimateDetailsAsync(
@@ -170,6 +173,9 @@ public partial class MainViewModel : ViewModelBase
 
         Reader = new ReaderViewModel(
             book,
+            _settingsService,
+            _appDataService,
+            _appData,
             CloseReader);
 
         IsReaderOpen = true;
@@ -199,6 +205,7 @@ public partial class MainViewModel : ViewModelBase
         double targetOpacity)
     {
         var delay = AnimationDuration / AnimationSteps;
+
         var startOffset = DetailsPanelOffset;
         var startOpacity = DetailsOverlayOpacity;
 

@@ -1,163 +1,508 @@
 // ViewModels/ReaderViewModel.cs
 using System;
+using System.IO;
+using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Libris.Models;
+using Libris.Services;
 
 namespace Libris.ViewModels;
 
 /// <summary>
-/// ViewModel режима чтения выбранной книги.
-/// Отвечает за отображение книги, параметры чтения и прогресс.
+/// ViewModel режима чтения книги.
 /// </summary>
 public partial class ReaderViewModel : ObservableObject
 {
     private readonly Book _book;
     private readonly Action? _closeReader;
+    private readonly BookReaderService _readerService;
+    private readonly SettingsService _settingsService;
+    private readonly AppDataService _appDataService;
+    private readonly AppData _appData;
 
-    /// <summary>
-    /// Создаёт ViewModel режима чтения.
-    /// </summary>
-    /// <param name="book">Книга, открытая для чтения.</param>
-    /// <param name="closeReader">
-    /// Действие, вызываемое при закрытии режима чтения.
-    /// </param>
+    private ReaderDocument? _document;
+
     public ReaderViewModel(
         Book book,
+        SettingsService settingsService,
+        AppDataService appDataService,
+        AppData appData,
         Action? closeReader = null)
     {
+        ArgumentNullException.ThrowIfNull(book);
+        ArgumentNullException.ThrowIfNull(settingsService);
+        ArgumentNullException.ThrowIfNull(appDataService);
+        ArgumentNullException.ThrowIfNull(appData);
+
         _book = book;
+        _settingsService = settingsService;
+        _appDataService = appDataService;
+        _appData = appData;
         _closeReader = closeReader;
 
-        ReadingWidth = 760;
-        FontSize = 18;
-        LineHeight = 1.6;
+        _readerService = new BookReaderService();
+
+        var settings = _settingsService.Load();
+
+        ReadingWidth =
+            Math.Clamp(
+                settings.ReadingWidth,
+                400,
+                1400);
+
+        FontSize =
+            Math.Clamp(
+                settings.FontSize,
+                10,
+                48);
+
+        LineHeight =
+            Math.Clamp(
+                settings.LineSpacing,
+                1.0,
+                3.0);
+
+        FontFamily =
+            string.IsNullOrWhiteSpace(settings.DefaultFont)
+                ? "Inter"
+                : settings.DefaultFont;
     }
 
     /// <summary>
-    /// Книга, открытая в режиме чтения.
+    /// Открытая книга.
     /// </summary>
     public Book Book => _book;
 
-    /// <summary>
-    /// Название открытой книги.
-    /// </summary>
     public string Title => _book.Title;
 
-    /// <summary>
-    /// Автор открытой книги.
-    /// </summary>
-    public string Author => _book.Author;
+    public string Author =>
+        string.IsNullOrWhiteSpace(_book.Author)
+            ? "Unknown author"
+            : _book.Author;
 
     /// <summary>
-    /// Путь к обложке открытой книги.
+    /// HTML текущей главы Reader.
     /// </summary>
-    public string? CoverPath => _book.CoverPath;
+    [ObservableProperty]
+    private string readerHtml = string.Empty;
 
-    /// <summary>
-    /// Содержимое книги, отображаемое в режиме чтения.
-    /// Временно содержит демонстрационный текст.
-    /// В дальнейшем здесь будет загружаться содержимое выбранной книги.
-    /// </summary>
-    public string Content { get; } = """
-        Chapter One
-
-        The room was quiet.
-
-        Beyond the window, the evening light slowly disappeared
-        behind the buildings. A faint glow remained in the sky,
-        illuminating the streets below.
-
-        He opened the book again and continued reading.
-
-        Every page brought another detail into the story.
-
-        The characters became more familiar, the world around
-        them more believable, and the distance between the reader
-        and the story gradually disappeared.
-
-        This is temporary reader content.
-
-        Later, Libris will load the actual contents of the selected
-        book and render it according to the selected reading settings.
-        """;
-
-    /// <summary>
-    /// Максимальная ширина области текста при чтении.
-    /// </summary>
     [ObservableProperty]
     private double readingWidth;
 
-    /// <summary>
-    /// Размер шрифта текста книги.
-    /// </summary>
     [ObservableProperty]
     private double fontSize;
 
-    /// <summary>
-    /// Межстрочный интервал текста книги.
-    /// </summary>
     [ObservableProperty]
     private double lineHeight;
 
+    [ObservableProperty]
+    private string fontFamily;
+
     /// <summary>
-    /// Текущий прогресс чтения книги от 0 до 1.
+    /// Текущий индекс главы.
+    /// </summary>
+    [ObservableProperty]
+    private int currentChapter;
+
+    /// <summary>
+    /// Прогресс внутри текущей главы.
+    /// </summary>
+    [ObservableProperty]
+    private double chapterProgress;
+
+    /// <summary>
+    /// Количество глав.
+    /// </summary>
+    public int ChapterCount =>
+        _document?.Chapters.Count ?? 0;
+
+    /// <summary>
+    /// Общий прогресс книги.
     /// </summary>
     public double Progress
     {
-        get => _book.Progress;
-        set
+        get
         {
-            var clampedValue = Math.Clamp(value, 0.0, 1.0);
+            if (_document is null ||
+                _document.Chapters.Count == 0)
+            {
+                return _book.Progress;
+            }
 
-            if (Math.Abs(_book.Progress - clampedValue) < 0.001)
-                return;
+            var progress =
+                (CurrentChapter + ChapterProgress) /
+                _document.Chapters.Count;
 
-            _book.Progress = clampedValue;
+            return Math.Clamp(progress, 0.0, 1.0);
+        }
+    }
 
-            OnPropertyChanged();
-            OnPropertyChanged(nameof(ProgressText));
-            OnPropertyChanged(nameof(PositionText));
+    public string ProgressText =>
+        $"{Math.Round(Progress * 100):0}%";
+
+    public string PositionText
+    {
+        get
+        {
+            if (_document is null)
+                return "Loading…";
+
+            return
+                $"Chapter {CurrentChapter + 1} " +
+                $"of {ChapterCount}";
+        }
+    }
+
+    public string CurrentChapterTitle
+    {
+        get
+        {
+            if (_document is null ||
+                CurrentChapter < 0 ||
+                CurrentChapter >=
+                _document.Chapters.Count)
+            {
+                return "Reading";
+            }
+
+            return
+                _document.Chapters[
+                    CurrentChapter].Title;
+        }
+    }
+
+    public bool CanGoPrevious =>
+        CurrentChapter > 0;
+
+    public bool CanGoNext =>
+        _document is not null &&
+        CurrentChapter <
+        _document.Chapters.Count - 1;
+
+    /// <summary>
+    /// Загружает книгу и восстанавливает последнюю позицию.
+    /// </summary>
+    public async Task LoadAsync()
+    {
+        try
+        {
+            _document =
+                await _readerService.LoadAsync(
+                    _book.FilePath);
+
+            RestorePosition();
+
+            RebuildReaderHtml();
+            NotifyChapterChanged();
+        }
+        catch (Exception ex) when (
+            ex is IOException
+            or UnauthorizedAccessException
+            or InvalidOperationException
+            or NotSupportedException)
+        {
+            ReaderHtml =
+                BuildErrorHtml(
+                    "Unable to open this book.",
+                    ex.Message);
+
+            OnPropertyChanged(
+                nameof(PositionText));
         }
     }
 
     /// <summary>
-    /// Текущий прогресс чтения в процентном формате.
+    /// Сохраняет текущую позицию чтения.
     /// </summary>
-    public string ProgressText =>
-        $"{Math.Round(Progress * 100):0}%";
+    public void SavePosition()
+    {
+        if (_document is null)
+            return;
+
+        var key = _book.Id.ToString();
+
+        _appData.ReadingPositions[key] =
+            new ReaderPosition
+            {
+                Chapter = CurrentChapter,
+                ChapterProgress =
+                    Math.Clamp(
+                        ChapterProgress,
+                        0.0,
+                        1.0)
+            };
+
+        _book.Progress = Progress;
+
+        _appDataService.Save(_appData);
+    }
 
     /// <summary>
-    /// Текущая позиция чтения.
-    /// Временный вариант до реализации реальной пагинации.
+    /// Обновляет позицию внутри текущей главы.
+    /// Вызывается ReaderView при прокрутке WebView.
     /// </summary>
-    public string PositionText =>
-        $"Page 1 • {ProgressText}";
+    public void UpdateChapterProgress(
+        double progress)
+    {
+        if (_document is null)
+            return;
 
-    /// <summary>
-    /// Закрывает режим чтения.
-    /// </summary>
+        ChapterProgress =
+            Math.Clamp(progress, 0.0, 1.0);
+
+        _book.Progress = Progress;
+
+        OnPropertyChanged(nameof(Progress));
+        OnPropertyChanged(nameof(ProgressText));
+
+        SavePosition();
+    }
+
     [RelayCommand]
     private void Close()
     {
+        SavePosition();
         _closeReader?.Invoke();
     }
 
     /// <summary>
-    /// Переходит на предыдущую страницу книги.
+    /// Переходит к предыдущей главе.
     /// </summary>
     [RelayCommand]
     private void PreviousPage()
     {
-        // TODO: Реализовать переход на предыдущую страницу.
+        if (!CanGoPrevious)
+            return;
+
+        SavePosition();
+
+        CurrentChapter--;
+        ChapterProgress = 0;
+
+        RebuildReaderHtml();
+        NotifyChapterChanged();
     }
 
     /// <summary>
-    /// Переходит на следующую страницу книги.
+    /// Переходит к следующей главе.
     /// </summary>
     [RelayCommand]
     private void NextPage()
     {
-        // TODO: Реализовать переход на следующую страницу.
+        if (!CanGoNext)
+            return;
+
+        SavePosition();
+
+        CurrentChapter++;
+        ChapterProgress = 0;
+
+        RebuildReaderHtml();
+        NotifyChapterChanged();
+    }
+
+    partial void OnCurrentChapterChanged(int value)
+    {
+        NotifyChapterChanged();
+    }
+
+    partial void OnChapterProgressChanged(double value)
+    {
+        OnPropertyChanged(nameof(Progress));
+        OnPropertyChanged(nameof(ProgressText));
+    }
+
+    partial void OnFontSizeChanged(double value)
+    {
+        value = Math.Clamp(value, 10, 48);
+
+        if (Math.Abs(FontSize - value) >
+            double.Epsilon)
+        {
+            FontSize = value;
+            return;
+        }
+
+        RebuildReaderHtml();
+    }
+
+    partial void OnLineHeightChanged(double value)
+    {
+        value = Math.Clamp(value, 1.0, 3.0);
+
+        if (Math.Abs(LineHeight - value) >
+            double.Epsilon)
+        {
+            LineHeight = value;
+            return;
+        }
+
+        RebuildReaderHtml();
+    }
+
+    partial void OnReadingWidthChanged(double value)
+    {
+        value = Math.Clamp(value, 400, 1400);
+
+        if (Math.Abs(ReadingWidth - value) >
+            double.Epsilon)
+        {
+            ReadingWidth = value;
+            return;
+        }
+
+        RebuildReaderHtml();
+    }
+
+    partial void OnFontFamilyChanged(string value)
+    {
+        if (string.IsNullOrWhiteSpace(value))
+        {
+            FontFamily = "Inter";
+            return;
+        }
+
+        RebuildReaderHtml();
+    }
+
+    private void RestorePosition()
+    {
+        if (_document is null ||
+            _document.Chapters.Count == 0)
+        {
+            CurrentChapter = 0;
+            ChapterProgress = 0;
+            return;
+        }
+
+        var key = _book.Id.ToString();
+
+        if (!_appData.ReadingPositions.TryGetValue(
+                key,
+                out var position))
+        {
+            CurrentChapter = 0;
+            ChapterProgress = 0;
+            return;
+        }
+
+        CurrentChapter =
+            Math.Clamp(
+                position.Chapter,
+                0,
+                _document.Chapters.Count - 1);
+
+        ChapterProgress =
+            Math.Clamp(
+                position.ChapterProgress,
+                0.0,
+                1.0);
+    }
+
+    private void RebuildReaderHtml()
+    {
+        if (_document is null ||
+            CurrentChapter < 0 ||
+            CurrentChapter >=
+            _document.Chapters.Count)
+        {
+            return;
+        }
+
+        ReaderHtml =
+            ReaderHtmlBuilder.BuildChapter(
+                _document.Title,
+                _document.Chapters[CurrentChapter],
+                FontFamily,
+                FontSize,
+                LineHeight,
+                ReadingWidth);
+    }
+
+    private void NotifyChapterChanged()
+    {
+        OnPropertyChanged(
+            nameof(CurrentChapterTitle));
+
+        OnPropertyChanged(
+            nameof(PositionText));
+
+        OnPropertyChanged(
+            nameof(CanGoPrevious));
+
+        OnPropertyChanged(
+            nameof(CanGoNext));
+
+        OnPropertyChanged(
+            nameof(ChapterCount));
+
+        OnPropertyChanged(
+            nameof(Progress));
+
+        OnPropertyChanged(
+            nameof(ProgressText));
+    }
+
+    private static string BuildErrorHtml(
+        string title,
+        string message)
+    {
+        var safeTitle =
+            System.Net.WebUtility.HtmlEncode(title);
+
+        var safeMessage =
+            System.Net.WebUtility.HtmlEncode(message);
+
+        return $$"""
+            <!DOCTYPE html>
+            <html>
+            <head>
+                <meta charset="utf-8">
+
+                <style>
+                    html,
+                    body {
+                        height: 100%;
+                    }
+
+                    body {
+                        margin: 0;
+
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+
+                        background: transparent;
+                        color: #777;
+
+                        font-family:
+                            system-ui,
+                            sans-serif;
+
+                        text-align: center;
+                    }
+
+                    h1 {
+                        color: #555;
+                        font-size: 24px;
+                    }
+
+                    p {
+                        max-width: 600px;
+                        line-height: 1.5;
+                    }
+                </style>
+            </head>
+
+            <body>
+                <div>
+                    <h1>{{safeTitle}}</h1>
+                    <p>{{safeMessage}}</p>
+                </div>
+            </body>
+
+            </html>
+            """;
     }
 }

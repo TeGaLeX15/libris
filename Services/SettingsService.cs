@@ -2,7 +2,6 @@
 using System;
 using System.IO;
 using System.Text.Json;
-
 using Libris.Models;
 
 namespace Libris.Services;
@@ -18,9 +17,6 @@ public sealed class SettingsService
     private readonly string _settingsDirectory;
     private readonly string _settingsFile;
 
-    /// <summary>
-    /// Настройки сериализации пользовательских настроек.
-    /// </summary>
     private static readonly JsonSerializerOptions JsonOptions = new()
     {
         WriteIndented = true,
@@ -28,8 +24,7 @@ public sealed class SettingsService
     };
 
     /// <summary>
-    /// Инициализирует сервис пользовательских настроек
-    /// и определяет расположение файла настроек.
+    /// Инициализирует сервис пользовательских настроек.
     /// </summary>
     public SettingsService()
     {
@@ -44,18 +39,16 @@ public sealed class SettingsService
     }
 
     /// <summary>
-    /// Загружает пользовательские настройки из локального JSON-файла.
+    /// Загружает пользовательские настройки.
     /// </summary>
-    /// <returns>
-    /// Загруженные настройки или настройки по умолчанию,
-    /// если файл отсутствует или его невозможно прочитать.
-    /// </returns>
     public AppSettings Load()
     {
         try
         {
             if (!File.Exists(_settingsFile))
+            {
                 return new AppSettings();
+            }
 
             var json = File.ReadAllText(_settingsFile);
 
@@ -66,25 +59,21 @@ public sealed class SettingsService
         }
         catch (JsonException)
         {
-            // Повреждённый файл настроек не должен приводить к падению приложения.
             return new AppSettings();
         }
         catch (IOException)
         {
-            // Ошибка чтения файла не должна приводить к падению приложения.
             return new AppSettings();
         }
         catch (UnauthorizedAccessException)
         {
-            // Отсутствие доступа к файлу не должно приводить к падению приложения.
             return new AppSettings();
         }
     }
 
     /// <summary>
-    /// Сохраняет пользовательские настройки в локальный JSON-файл.
+    /// Сохраняет пользовательские настройки.
     /// </summary>
-    /// <param name="settings">Настройки для сохранения.</param>
     public void Save(AppSettings settings)
     {
         ArgumentNullException.ThrowIfNull(settings);
@@ -97,9 +86,16 @@ public sealed class SettingsService
                 settings,
                 JsonOptions);
 
+            var temporaryFile = _settingsFile + ".tmp";
+
             File.WriteAllText(
-                _settingsFile,
+                temporaryFile,
                 json);
+
+            File.Move(
+                temporaryFile,
+                _settingsFile,
+                true);
         }
         catch (IOException)
         {
@@ -107,7 +103,7 @@ public sealed class SettingsService
         }
         catch (UnauthorizedAccessException)
         {
-            // Отсутствие доступа к файлу не должно приводить к падению приложения.
+            // Отсутствие доступа не должно приводить к падению приложения.
         }
     }
 }

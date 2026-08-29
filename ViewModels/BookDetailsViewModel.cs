@@ -1,109 +1,68 @@
 // ViewModels/BookDetailsViewModel.cs
 using System;
 using System.IO;
-
 using Avalonia.Media.Imaging;
-
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-
 using Libris.Models;
 
 namespace Libris.ViewModels;
 
 /// <summary>
-/// Представляет состояние панели с подробной информацией о выбранной книге.
+/// Представляет состояние панели подробной информации о выбранной книге.
 /// </summary>
 public partial class BookDetailsViewModel : ObservableObject
 {
-    /// <summary>
-    /// Текущая выбранная книга.
-    /// </summary>
     [ObservableProperty]
     private Book? book;
 
-    /// <summary>
-    /// Определяет, открыта ли панель с подробностями книги.
-    /// </summary>
     [ObservableProperty]
     private bool isOpen;
 
+    private Bitmap? _cover;
+
     /// <summary>
-    /// Возникает при запросе закрытия панели с подробностями.
+    /// Возникает при запросе закрытия панели.
     /// </summary>
     public event EventHandler? CloseRequested;
 
     /// <summary>
-    /// Возникает при запросе открытия выбранной книги для чтения.
+    /// Возникает при запросе открытия книги для чтения.
     /// </summary>
     public event EventHandler<Book>? ReadRequested;
 
     /// <summary>
-    /// Возвращает обложку текущей книги.
+    /// Обложка текущей книги.
     /// </summary>
-    public Bitmap? Cover
-    {
-        get
-        {
-            if (Book is null ||
-                string.IsNullOrWhiteSpace(Book.CoverPath))
-            {
-                return null;
-            }
+    public Bitmap? Cover => _cover;
 
-            try
-            {
-                return new Bitmap(Book.CoverPath);
-            }
-            catch (IOException)
-            {
-                // Отсутствующая или недоступная обложка не должна
-                // приводить к падению приложения.
-                return null;
-            }
-            catch (ArgumentException)
-            {
-                // Некорректный путь или формат изображения.
-                return null;
-            }
-        }
-    }
-
-    /// <summary>
-    /// Возвращает название текущей книги.
-    /// </summary>
     public string Title =>
         Book?.Title ?? "Unknown title";
 
-    /// <summary>
-    /// Возвращает имя автора текущей книги.
-    /// </summary>
     public string Author =>
         string.IsNullOrWhiteSpace(Book?.Author)
             ? "Unknown author"
             : Book.Author;
 
-    /// <summary>
-    /// Возвращает формат файла текущей книги.
-    /// </summary>
-    public string Format =>
-        string.IsNullOrWhiteSpace(Book?.FilePath)
-            ? "Unknown"
-            : Path.GetExtension(Book.FilePath)
+    public string Format
+    {
+        get
+        {
+            if (string.IsNullOrWhiteSpace(Book?.FilePath))
+                return "Unknown";
+
+            return Path
+                .GetExtension(Book.FilePath)
                 .TrimStart('.')
                 .ToUpperInvariant();
+        }
+    }
 
-    /// <summary>
-    /// Возвращает имя файла текущей книги.
-    /// </summary>
     public string FileName =>
         string.IsNullOrWhiteSpace(Book?.FilePath)
             ? "Unknown"
             : Path.GetFileName(Book.FilePath);
 
-    /// <summary>
-    /// Возвращает размер файла текущей книги в удобном для отображения формате.
-    /// </summary>
     public string FileSize
     {
         get
@@ -132,34 +91,33 @@ public partial class BookDetailsViewModel : ObservableObject
             }
             catch (IOException)
             {
-                // Ошибка доступа к файлу не должна приводить
-                // к падению приложения.
                 return "Unknown";
             }
             catch (UnauthorizedAccessException)
             {
-                // Файл может существовать, но быть недоступным.
                 return "Unknown";
             }
         }
     }
 
     /// <summary>
-    /// Открывает панель с информацией о выбранной книге.
+    /// Открывает панель информации о книге.
     /// </summary>
-    /// <param name="selectedBook">Книга для отображения.</param>
     public void Open(Book selectedBook)
     {
         ArgumentNullException.ThrowIfNull(selectedBook);
 
+        DisposeCover();
+
         Book = selectedBook;
         IsOpen = true;
 
+        LoadCover();
         NotifyBookPropertiesChanged();
     }
 
     /// <summary>
-    /// Закрывает панель с подробностями книги.
+    /// Закрывает панель.
     /// </summary>
     [RelayCommand]
     private void Close()
@@ -168,18 +126,20 @@ public partial class BookDetailsViewModel : ObservableObject
     }
 
     /// <summary>
-    /// Закрывает панель и очищает выбранную книгу.
+    /// Полностью закрывает панель и освобождает ресурсы.
     /// </summary>
     public void ClosePanel()
     {
         IsOpen = false;
         Book = null;
 
+        DisposeCover();
+
         NotifyBookPropertiesChanged();
     }
 
     /// <summary>
-    /// Запрашивает открытие текущей книги в режиме чтения.
+    /// Запрашивает открытие книги в Reader.
     /// </summary>
     [RelayCommand]
     private void Read()
@@ -190,10 +150,38 @@ public partial class BookDetailsViewModel : ObservableObject
         ReadRequested?.Invoke(this, Book);
     }
 
-    /// <summary>
-    /// Уведомляет интерфейс об изменении вычисляемых свойств,
-    /// зависящих от текущей книги.
-    /// </summary>
+    private void LoadCover()
+    {
+        if (string.IsNullOrWhiteSpace(Book?.CoverPath))
+            return;
+
+        try
+        {
+            if (File.Exists(Book.CoverPath))
+            {
+                _cover = new Bitmap(Book.CoverPath);
+            }
+        }
+        catch (IOException)
+        {
+            _cover = null;
+        }
+        catch (UnauthorizedAccessException)
+        {
+            _cover = null;
+        }
+        catch (ArgumentException)
+        {
+            _cover = null;
+        }
+    }
+
+    private void DisposeCover()
+    {
+        _cover?.Dispose();
+        _cover = null;
+    }
+
     private void NotifyBookPropertiesChanged()
     {
         OnPropertyChanged(nameof(Cover));

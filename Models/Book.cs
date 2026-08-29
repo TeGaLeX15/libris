@@ -1,5 +1,6 @@
 // Models/Book.cs
 using System;
+using CommunityToolkit.Mvvm.ComponentModel;
 
 namespace Libris.Models;
 
@@ -7,76 +8,88 @@ namespace Libris.Models;
 /// Представляет книгу, хранящуюся в библиотеке Libris.
 /// Содержит сведения о файле, метаданные книги и состояние чтения.
 /// </summary>
-public sealed class Book
+public partial class Book : ObservableObject
 {
     /// <summary>
     /// Уникальный идентификатор книги в библиотеке.
     /// </summary>
-    public Guid Id { get; set; } = Guid.NewGuid();
+    [ObservableProperty]
+    private Guid id = Guid.NewGuid();
 
     /// <summary>
     /// Путь к управляемой копии файла книги,
     /// хранящейся в директории Libris.
     /// </summary>
-    public string FilePath { get; set; } = string.Empty;
+    [ObservableProperty]
+    private string filePath = string.Empty;
 
     /// <summary>
     /// SHA-256 хеш содержимого импортированного файла.
     /// Используется для обнаружения дубликатов книг.
     /// </summary>
-    public string FileHash { get; set; } = string.Empty;
+    [ObservableProperty]
+    private string fileHash = string.Empty;
 
     /// <summary>
     /// Название книги.
     /// </summary>
-    public string Title { get; set; } = string.Empty;
+    [ObservableProperty]
+    private string title = string.Empty;
 
     /// <summary>
     /// Автор книги.
     /// </summary>
-    public string Author { get; set; } = string.Empty;
+    [ObservableProperty]
+    private string author = string.Empty;
 
     /// <summary>
     /// Описание или аннотация книги.
     /// </summary>
-    public string? Description { get; set; }
+    [ObservableProperty]
+    private string? description;
 
     /// <summary>
     /// Издательство книги.
     /// </summary>
-    public string? Publisher { get; set; }
+    [ObservableProperty]
+    private string? publisher;
 
     /// <summary>
     /// Язык, на котором написана книга.
     /// </summary>
-    public string? Language { get; set; }
+    [ObservableProperty]
+    private string? language;
 
     /// <summary>
     /// Международный стандартный номер книги (ISBN).
     /// </summary>
-    public string? Isbn { get; set; }
+    [ObservableProperty]
+    private string? isbn;
 
     /// <summary>
     /// Путь к файлу обложки книги.
     /// </summary>
-    public string? CoverPath { get; set; }
+    [ObservableProperty]
+    private string? coverPath;
 
     /// <summary>
     /// Дата публикации книги.
-    /// Если дата неизвестна, значение равно <see langword="null"/>.
+    /// Если дата неизвестна, значение равно null.
     /// </summary>
-    public DateTime? PublishedAt { get; set; }
+    [ObservableProperty]
+    private DateTime? publishedAt;
 
     /// <summary>
     /// Текущий прогресс чтения книги.
-    /// Значение должно находиться в диапазоне от 0.0 до 1.0,
-    /// где 0.0 означает отсутствие прогресса, а 1.0 — полностью прочитанную книгу.
+    /// Значение находится в диапазоне от 0.0 до 1.0.
     /// </summary>
-    public double Progress { get; set; }
+    [ObservableProperty]
+    private double progress;
 
     /// <summary>
     /// Дата и время добавления книги в библиотеку.
     /// Хранится в формате UTC.
     /// </summary>
-    public DateTime AddedAt { get; set; } = DateTime.UtcNow;
+    [ObservableProperty]
+    private DateTime addedAt = DateTime.UtcNow;
 }

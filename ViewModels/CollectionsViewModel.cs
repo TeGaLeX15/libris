@@ -279,8 +279,7 @@ public partial class CollectionsViewModel : ViewModelBase
     /// Выбирает книгу и уведомляет подписчиков о выборе.
     /// </summary>
     /// <param name="book">Выбранная книга.</param>
-    [RelayCommand]
-    private void SelectBook(Book? book)
+    public void SelectBook(Book? book)
     {
         if (book is null)
             return;

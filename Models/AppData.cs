@@ -34,4 +34,9 @@ public sealed class ReaderPosition
     /// Прогресс внутри текущей главы от 0 до 1.
     /// </summary>
     public double ChapterProgress { get; set; }
+
+    /// <summary>
+    /// Общий прогресс чтения книги от 0 до 1.
+    /// </summary>
+    public double Progress { get; set; }
 }

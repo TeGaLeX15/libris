@@ -20,7 +20,6 @@ public partial class ReaderViewModel : ObservableObject
     private readonly SettingsService _settingsService;
     private readonly AppDataService _appDataService;
     private readonly AppData _appData;
-
     private ReaderDocument? _document;
 
     public ReaderViewModel(
@@ -209,12 +208,17 @@ public partial class ReaderViewModel : ObservableObject
     }
 
     /// <summary>
-    /// Сохраняет текущую позицию чтения.
+    /// Сохраняет текущую позицию чтения и общий прогресс книги.
     /// </summary>
     public void SavePosition()
     {
         if (_document is null)
             return;
+
+        var progress = Math.Clamp(
+            Progress,
+            0.0,
+            1.0);
 
         var key = _book.Id.ToString();
 
@@ -222,14 +226,17 @@ public partial class ReaderViewModel : ObservableObject
             new ReaderPosition
             {
                 Chapter = CurrentChapter,
+
                 ChapterProgress =
                     Math.Clamp(
                         ChapterProgress,
                         0.0,
-                        1.0)
+                        1.0),
+
+                Progress = progress
             };
 
-        _book.Progress = Progress;
+        _book.Progress = progress;
 
         _appDataService.Save(_appData);
     }
@@ -397,6 +404,14 @@ public partial class ReaderViewModel : ObservableObject
                 position.ChapterProgress,
                 0.0,
                 1.0);
+
+        // Восстанавливаем общий прогресс
+        // сразу после загрузки позиции.
+        _book.Progress =
+            Math.Clamp(
+                position.Progress,
+                0.0,
+                1.0);
     }
 
     private void RebuildReaderHtml()
@@ -487,6 +502,7 @@ public partial class ReaderViewModel : ObservableObject
                     }
                 </style>
             </head>
+
             <body>
                 <div>
                     <h1>{{safeTitle}}</h1>

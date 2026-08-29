@@ -1,0 +1,140 @@
+<!--  Controls/BookCard.axaml  -->
+<UserControl
+    x:Class="Libris.Controls.BookCard"
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:converters="using:Libris.Converters"
+    xmlns:models="using:Libris.Models"
+    xmlns:suki="clr-namespace:SukiUI.Controls;assembly=SukiUI"
+    x:DataType="models:Book">
+
+    <UserControl.Resources>
+        <converters:BookCoverConverter x:Key="BookCoverConverter" />
+    </UserControl.Resources>
+
+    <suki:GlassCard
+        Width="184"
+        Height="326"
+        Padding="0"
+        IsAnimated="True"
+        IsInteractive="True">
+
+        <Grid RowDefinitions="218,*">
+
+            <!--  =================================  -->
+            <!--  Обложка  -->
+            <!--  =================================  -->
+
+            <Grid Grid.Row="0" ClipToBounds="True">
+
+                <!--  Картинка занимает ВСЮ область  -->
+                <Image
+                    HorizontalAlignment="Stretch"
+                    VerticalAlignment="Stretch"
+                    Source="{Binding CoverPath, Converter={StaticResource BookCoverConverter}}"
+                    Stretch="UniformToFill" />
+
+                <!--  Кнопка поверх картинки  -->
+                <Button
+                    Padding="0"
+                    HorizontalAlignment="Stretch"
+                    VerticalAlignment="Stretch"
+                    HorizontalContentAlignment="Stretch"
+                    VerticalContentAlignment="Stretch"
+                    Background="Transparent"
+                    BorderThickness="0"
+                    Click="OpenBook_Click" />
+
+                <!--  Скругление только верхних углов  -->
+                <Border
+                    BorderThickness="0"
+                    CornerRadius="10,10,0,0"
+                    IsHitTestVisible="False" />
+
+            </Grid>
+
+
+            <!--  =================================  -->
+            <!--  Нижняя часть карточки  -->
+            <!--  =================================  -->
+
+            <Grid
+                Grid.Row="1"
+                Margin="11,9,11,10"
+                RowDefinitions="36,17,*,Auto"
+                RowSpacing="4">
+
+                <!--  Название  -->
+                <Button
+                    Grid.Row="0"
+                    Padding="0"
+                    HorizontalContentAlignment="Left"
+                    VerticalContentAlignment="Top"
+                    Background="Transparent"
+                    BorderThickness="0"
+                    Click="OpenBook_Click">
+
+                    <TextBlock
+                        FontSize="13.5"
+                        FontWeight="SemiBold"
+                        MaxLines="2"
+                        Text="{Binding Title}"
+                        TextTrimming="CharacterEllipsis"
+                        TextWrapping="Wrap" />
+
+                </Button>
+
+
+                <!--  Автор  -->
+                <Button
+                    Grid.Row="1"
+                    Padding="0"
+                    HorizontalContentAlignment="Left"
+                    VerticalContentAlignment="Center"
+                    Background="Transparent"
+                    BorderThickness="0"
+                    Click="OpenBook_Click">
+
+                    <TextBlock
+                        FontSize="12"
+                        Opacity="0.5"
+                        Text="{Binding Author}"
+                        TextTrimming="CharacterEllipsis" />
+
+                </Button>
+
+
+                <!--  Свободное пространство  -->
+                <Border Grid.Row="2" />
+
+
+                <!--  Прогресс  -->
+                <Grid
+                    Grid.Row="3"
+                    RowDefinitions="Auto,4"
+                    RowSpacing="4">
+
+                    <TextBlock
+                        Grid.Row="0"
+                        HorizontalAlignment="Right"
+                        FontSize="10"
+                        Opacity="0.45"
+                        Text="{Binding Progress, StringFormat={}{0:P0}}" />
+
+                    <ProgressBar
+                        Grid.Row="1"
+                        Height="4"
+                        Maximum="1"
+                        Minimum="0"
+                        ShowProgressText="False"
+                        Value="{Binding Progress}" />
+
+                </Grid>
+
+            </Grid>
+
+        </Grid>
+
+    </suki:GlassCard>
+
+</UserControl>

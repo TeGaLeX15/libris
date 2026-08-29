@@ -1,9 +1,9 @@
 // Views/LibraryView.axaml.cs
 using System.Linq;
 using Avalonia.Controls;
-using Avalonia.Input;
 using Avalonia.Interactivity;
 using Avalonia.Platform.Storage;
+using Libris.Controls;
 using Libris.Models;
 using Libris.ViewModels;
 
@@ -25,19 +25,16 @@ public partial class LibraryView : UserControl
     }
 
     /// <summary>
-    /// Обрабатывает нажатие на карточку книги
-    /// и открывает выбранную книгу через модель представления.
+    /// Открывает книгу, переданную карточкой.
     /// </summary>
-    /// <param name="sender">Элемент управления, на котором произошло нажатие.</param>
-    /// <param name="e">Аргументы события нажатия указателя.</param>
-    private void BookCard_PointerPressed(
+    private void BookCard_OpenBookRequested(
         object? sender,
-        PointerPressedEventArgs e)
+        RoutedEventArgs e)
     {
-        if (sender is not Control control)
+        if (sender is not BookCard bookCard)
             return;
 
-        if (control.DataContext is not Book book)
+        if (bookCard.DataContext is not Book book)
             return;
 
         if (DataContext is not LibraryViewModel viewModel)
@@ -50,8 +47,6 @@ public partial class LibraryView : UserControl
     /// Открывает системный диалог выбора файлов
     /// и добавляет выбранные книги в библиотеку.
     /// </summary>
-    /// <param name="sender">Элемент управления, вызвавший событие.</param>
-    /// <param name="e">Аргументы события маршрутизации.</param>
     private async void AddBooks_Click(
         object? sender,
         RoutedEventArgs e)
@@ -94,5 +89,24 @@ public partial class LibraryView : UserControl
             .Select(path => path!);
 
         await viewModel.AddBooksAsync(filePaths);
+    }
+
+    /// <summary>
+    /// Обрабатывает выбор книги.
+    /// </summary>
+    private void BookCard_PointerPressed(
+        object? sender,
+        Avalonia.Input.PointerPressedEventArgs e)
+    {
+        if (sender is not Control control)
+            return;
+
+        if (control.DataContext is not Book book)
+            return;
+
+        if (DataContext is not LibraryViewModel viewModel)
+            return;
+
+        viewModel.SelectBook(book);
     }
 }

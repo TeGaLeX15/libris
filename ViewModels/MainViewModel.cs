@@ -93,7 +93,7 @@ public partial class MainViewModel : ViewModelBase
         _appDataService = appDataService;
         _appData = appData;
 
-        Library = new LibraryViewModel();
+        Library = new LibraryViewModel(appData);
         Collections = new CollectionsViewModel();
         Settings = new SettingsViewModel(settingsService);
         BookDetails = new BookDetailsViewModel();

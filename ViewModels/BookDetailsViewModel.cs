@@ -36,14 +36,23 @@ public partial class BookDetailsViewModel : ObservableObject
     /// </summary>
     public Bitmap? Cover => _cover;
 
+    /// <summary>
+    /// Название книги.
+    /// </summary>
     public string Title =>
         Book?.Title ?? "Unknown title";
 
+    /// <summary>
+    /// Автор книги.
+    /// </summary>
     public string Author =>
         string.IsNullOrWhiteSpace(Book?.Author)
             ? "Unknown author"
             : Book.Author;
 
+    /// <summary>
+    /// Формат файла книги.
+    /// </summary>
     public string Format
     {
         get
@@ -58,11 +67,17 @@ public partial class BookDetailsViewModel : ObservableObject
         }
     }
 
+    /// <summary>
+    /// Имя файла книги.
+    /// </summary>
     public string FileName =>
         string.IsNullOrWhiteSpace(Book?.FilePath)
             ? "Unknown"
             : Path.GetFileName(Book.FilePath);
 
+    /// <summary>
+    /// Размер файла книги.
+    /// </summary>
     public string FileSize
     {
         get
@@ -101,6 +116,35 @@ public partial class BookDetailsViewModel : ObservableObject
     }
 
     /// <summary>
+    /// Прогресс чтения книги от 0 до 1.
+    /// </summary>
+    public double Progress =>
+        Math.Clamp(Book?.Progress ?? 0.0, 0.0, 1.0);
+
+    /// <summary>
+    /// Прогресс чтения книги в процентах.
+    /// </summary>
+    public string ProgressText =>
+        $"{Math.Round(Progress * 100):0}%";
+
+    /// <summary>
+    /// Текстовое состояние чтения книги.
+    /// </summary>
+    public string ReadingStatus
+    {
+        get
+        {
+            if (Progress <= 0)
+                return "Not started";
+
+            if (Progress >= 1)
+                return "Finished";
+
+            return "In progress";
+        }
+    }
+
+    /// <summary>
     /// Открывает панель информации о книге.
     /// </summary>
     public void Open(Book selectedBook)
@@ -134,7 +178,6 @@ public partial class BookDetailsViewModel : ObservableObject
         Book = null;
 
         DisposeCover();
-
         NotifyBookPropertiesChanged();
     }
 
@@ -190,5 +233,30 @@ public partial class BookDetailsViewModel : ObservableObject
         OnPropertyChanged(nameof(Format));
         OnPropertyChanged(nameof(FileName));
         OnPropertyChanged(nameof(FileSize));
+        OnPropertyChanged(nameof(Progress));
+        OnPropertyChanged(nameof(ProgressText));
+        OnPropertyChanged(nameof(ReadingStatus));
+    }
+
+    partial void OnBookChanged(Book? value)
+    {
+        NotifyBookPropertiesChanged();
+
+        if (value is not null)
+        {
+            value.PropertyChanged += Book_PropertyChanged;
+        }
+    }
+
+    private void Book_PropertyChanged(
+        object? sender,
+        System.ComponentModel.PropertyChangedEventArgs e)
+    {
+        if (e.PropertyName != nameof(Book.Progress))
+            return;
+
+        OnPropertyChanged(nameof(Progress));
+        OnPropertyChanged(nameof(ProgressText));
+        OnPropertyChanged(nameof(ReadingStatus));
     }
 }

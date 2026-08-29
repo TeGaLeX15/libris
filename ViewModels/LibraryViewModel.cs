@@ -54,6 +54,7 @@ public partial class LibraryViewModel : ViewModelBase
 {
     private readonly LibraryService _libraryService;
     private readonly SettingsService _settingsService;
+    private readonly AppData _appData;
 
     /// <summary>
     /// Содержит все книги, загруженные в библиотеку.
@@ -112,8 +113,11 @@ public partial class LibraryViewModel : ViewModelBase
     /// Инициализирует ViewModel библиотеки
     /// и загружает сохранённые книги.
     /// </summary>
-    public LibraryViewModel()
+    public LibraryViewModel(AppData appData)
     {
+        ArgumentNullException.ThrowIfNull(appData);
+
+        _appData = appData;
         _libraryService = new LibraryService();
         _settingsService = new SettingsService();
 
@@ -146,7 +150,8 @@ public partial class LibraryViewModel : ViewModelBase
     }
 
     /// <summary>
-    /// Загружает сохранённые книги через сервис библиотеки.
+    /// Загружает сохранённые книги через сервис библиотеки
+    /// и восстанавливает сохранённый прогресс.
     /// </summary>
     private void LoadBooks()
     {
@@ -154,6 +159,7 @@ public partial class LibraryViewModel : ViewModelBase
 
         foreach (var book in _libraryService.Load())
         {
+            RestoreProgress(book);
             Books.Add(book);
         }
 
@@ -161,21 +167,46 @@ public partial class LibraryViewModel : ViewModelBase
     }
 
     /// <summary>
+    /// Восстанавливает общий прогресс книги
+    /// из сохранённых данных приложения.
+    /// </summary>
+    private void RestoreProgress(Book book)
+    {
+        var key = book.Id.ToString();
+
+        if (!_appData.ReadingPositions.TryGetValue(
+                key,
+                out var position))
+        {
+            return;
+        }
+
+        book.Progress =
+            Math.Clamp(
+                position.Progress,
+                0.0,
+                1.0);
+    }
+
+    /// <summary>
     /// Импортирует книги из указанных файлов
     /// и добавляет их в библиотеку.
     /// </summary>
-    public async Task AddBooksAsync(IEnumerable<string> filePaths)
+    public async Task AddBooksAsync(
+        IEnumerable<string> filePaths)
     {
         foreach (var filePath in filePaths)
         {
             if (string.IsNullOrWhiteSpace(filePath))
                 continue;
 
-            var book = await _libraryService.ImportAsync(filePath);
+            var book =
+                await _libraryService.ImportAsync(filePath);
 
             if (book is null)
                 continue;
 
+            RestoreProgress(book);
             Books.Add(book);
         }
 
@@ -191,6 +222,10 @@ public partial class LibraryViewModel : ViewModelBase
             return;
 
         _libraryService.Remove(book.Id);
+
+        _appData.ReadingPositions.Remove(
+            book.Id.ToString());
+
         Books.Remove(book);
 
         UpdateFilteredBooks();
@@ -198,7 +233,7 @@ public partial class LibraryViewModel : ViewModelBase
 
     /// <summary>
     /// Применяет текущий поисковый запрос и выбранную сортировку,
-    /// после чего обновляет список книг, отображаемый в интерфейсе.
+    /// после чего обновляет список книг, отображаемый в интерфейсе библиотеки.
     /// </summary>
     private void UpdateFilteredBooks()
     {
@@ -311,7 +346,8 @@ public partial class LibraryViewModel : ViewModelBase
     /// Сохраняет выбранную пользователем сортировку
     /// как сортировку библиотеки по умолчанию.
     /// </summary>
-    private void SaveDefaultSorting(BookSortOption sort)
+    private void SaveDefaultSorting(
+        BookSortOption sort)
     {
         var settings = _settingsService.Load();
 

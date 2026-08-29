@@ -72,13 +72,13 @@ public partial class SettingsViewModel : ViewModelBase
     private string defaultFont = "Inter";
 
     [ObservableProperty]
-    private double fontSize = 18;
+    private double fontSize = 16;
 
     [ObservableProperty]
-    private double lineSpacing = 1.65;
+    private double lineSpacing = 1.5;
 
     [ObservableProperty]
-    private double readingWidth = 760;
+    private double readingWidth = 720;
 
     [ObservableProperty]
     private string defaultSorting = "Recently Added";
@@ -87,12 +87,13 @@ public partial class SettingsViewModel : ViewModelBase
     private bool showProgress = true;
 
     [ObservableProperty]
-    private double coverSize = 180;
+    private double coverSize = 160;
 
     /// <summary>
     /// Создаёт ViewModel настроек и загружает сохранённые значения.
     /// </summary>
-    public SettingsViewModel(SettingsService settingsService)
+    public SettingsViewModel(
+        SettingsService settingsService)
     {
         ArgumentNullException.ThrowIfNull(settingsService);
 
@@ -103,12 +104,31 @@ public partial class SettingsViewModel : ViewModelBase
         Theme = NormalizeTheme(_settings.Theme);
         AccentColor = NormalizeAccentColor(_settings.AccentColor);
         DefaultFont = NormalizeFont(_settings.DefaultFont);
-        FontSize = Math.Clamp(_settings.FontSize, 10, 48);
-        LineSpacing = Math.Clamp(_settings.LineSpacing, 1.0, 3.0);
-        ReadingWidth = Math.Clamp(_settings.ReadingWidth, 400, 1400);
-        DefaultSorting = NormalizeSorting(_settings.DefaultSorting);
+
+        FontSize = Math.Clamp(
+            _settings.FontSize,
+            10,
+            48);
+
+        LineSpacing = Math.Clamp(
+            _settings.LineSpacing,
+            1.0,
+            3.0);
+
+        ReadingWidth = Math.Clamp(
+            _settings.ReadingWidth,
+            400,
+            1400);
+
+        DefaultSorting = NormalizeSorting(
+            _settings.DefaultSorting);
+
         ShowProgress = _settings.ShowProgress;
-        CoverSize = Math.Clamp(_settings.CoverSize, 100, 400);
+
+        CoverSize = Math.Clamp(
+            _settings.CoverSize,
+            100,
+            400);
 
         ApplyTheme(Theme);
         ApplyAccentColor(AccentColor);
@@ -125,6 +145,7 @@ public partial class SettingsViewModel : ViewModelBase
         }
 
         _settings.Theme = value;
+
         ApplyTheme(value);
         Save();
     }
@@ -140,6 +161,7 @@ public partial class SettingsViewModel : ViewModelBase
         }
 
         _settings.AccentColor = value;
+
         ApplyAccentColor(value);
         Save();
     }

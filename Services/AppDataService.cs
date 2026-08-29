@@ -2,7 +2,6 @@
 using System;
 using System.IO;
 using System.Text.Json;
-
 using Libris.Models;
 
 namespace Libris.Services;
@@ -83,6 +82,8 @@ public sealed class AppDataService
     /// <param name="data">Данные приложения для сохранения.</param>
     public void Save(AppData data)
     {
+        ArgumentNullException.ThrowIfNull(data);
+
         try
         {
             Directory.CreateDirectory(_dataDirectory);
@@ -91,7 +92,9 @@ public sealed class AppDataService
                 data,
                 JsonOptions);
 
-            File.WriteAllText(_dataFile, json);
+            File.WriteAllText(
+                _dataFile,
+                json);
         }
         catch (IOException)
         {

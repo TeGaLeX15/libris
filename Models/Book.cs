@@ -1,5 +1,4 @@
 // Models/Book.cs
-
 using System;
 
 namespace Libris.Models;
@@ -26,8 +25,6 @@ public sealed class Book
     /// Используется для обнаружения дубликатов книг.
     /// </summary>
     public string FileHash { get; set; } = string.Empty;
-
-    // Метаданные книги
 
     /// <summary>
     /// Название книги.
@@ -69,8 +66,6 @@ public sealed class Book
     /// Если дата неизвестна, значение равно <see langword="null"/>.
     /// </summary>
     public DateTime? PublishedAt { get; set; }
-
-    // Состояние книги в библиотеке
 
     /// <summary>
     /// Текущий прогресс чтения книги.

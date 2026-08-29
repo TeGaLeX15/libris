@@ -16,6 +16,11 @@ namespace Libris.ViewModels;
 public enum BookSortOption
 {
     /// <summary>
+    /// Сначала недавно добавленные книги.
+    /// </summary>
+    RecentlyAdded,
+
+    /// <summary>
     /// Сортировка книг по названию от А до Я.
     /// </summary>
     TitleAscending,
@@ -33,7 +38,12 @@ public enum BookSortOption
     /// <summary>
     /// Сортировка книг по автору от Я до А.
     /// </summary>
-    AuthorDescending
+    AuthorDescending,
+
+    /// <summary>
+    /// Сортировка книг по прогрессу от большего к меньшему.
+    /// </summary>
+    ProgressDescending
 }
 
 /// <summary>
@@ -43,6 +53,7 @@ public enum BookSortOption
 public partial class LibraryViewModel : ViewModelBase
 {
     private readonly LibraryService _libraryService;
+    private readonly SettingsService _settingsService;
 
     /// <summary>
     /// Содержит все книги, загруженные в библиотеку.
@@ -59,10 +70,12 @@ public partial class LibraryViewModel : ViewModelBase
     /// </summary>
     public IReadOnlyList<BookSortOption> SortOptions { get; } =
     [
+        BookSortOption.RecentlyAdded,
         BookSortOption.TitleAscending,
         BookSortOption.TitleDescending,
         BookSortOption.AuthorAscending,
-        BookSortOption.AuthorDescending
+        BookSortOption.AuthorDescending,
+        BookSortOption.ProgressDescending
     ];
 
     /// <summary>
@@ -77,7 +90,8 @@ public partial class LibraryViewModel : ViewModelBase
     private bool isEmpty;
 
     /// <summary>
-    /// Указывает, что поиск выполнен, но подходящие книги не найдены.
+    /// Указывает, что поиск выполнен,
+    /// но подходящие книги не найдены.
     /// </summary>
     [ObservableProperty]
     private bool isSearchEmpty;
@@ -92,40 +106,37 @@ public partial class LibraryViewModel : ViewModelBase
     /// Определяет текущий способ сортировки книг.
     /// </summary>
     [ObservableProperty]
-    private BookSortOption selectedSort = BookSortOption.TitleAscending;
+    private BookSortOption selectedSort;
 
     /// <summary>
-    /// Инициализирует ViewModel библиотеки и загружает сохранённые книги.
+    /// Инициализирует ViewModel библиотеки
+    /// и загружает сохранённые книги.
     /// </summary>
     public LibraryViewModel()
     {
         _libraryService = new LibraryService();
+        _settingsService = new SettingsService();
+
+        SelectedSort = GetSortOption(
+            _settingsService.Load().DefaultSorting);
 
         LoadBooks();
     }
 
-    /// <summary>
-    /// Обновляет отображаемый список книг при изменении поискового запроса.
-    /// </summary>
-    /// <param name="value">Новое значение поискового запроса.</param>
     partial void OnSearchQueryChanged(string value)
     {
         UpdateFilteredBooks();
     }
 
-    /// <summary>
-    /// Обновляет отображаемый список книг при изменении способа сортировки.
-    /// </summary>
-    /// <param name="value">Новый вариант сортировки.</param>
     partial void OnSelectedSortChanged(BookSortOption value)
     {
+        SaveDefaultSorting(value);
         UpdateFilteredBooks();
     }
 
     /// <summary>
     /// Выбирает книгу и уведомляет подписчиков о её выборе.
     /// </summary>
-    /// <param name="book">Выбранная книга.</param>
     public void SelectBook(Book? book)
     {
         if (book is null)
@@ -150,10 +161,9 @@ public partial class LibraryViewModel : ViewModelBase
     }
 
     /// <summary>
-    /// Импортирует книги из указанных файлов и добавляет их в библиотеку.
+    /// Импортирует книги из указанных файлов
+    /// и добавляет их в библиотеку.
     /// </summary>
-    /// <param name="filePaths">Пути к файлам книг для импорта.</param>
-    /// <returns>Задача, представляющая асинхронную операцию импорта.</returns>
     public async Task AddBooksAsync(IEnumerable<string> filePaths)
     {
         foreach (var filePath in filePaths)
@@ -175,7 +185,6 @@ public partial class LibraryViewModel : ViewModelBase
     /// <summary>
     /// Удаляет указанную книгу из библиотеки.
     /// </summary>
-    /// <param name="book">Книга, которую необходимо удалить.</param>
     public void RemoveBook(Book? book)
     {
         if (book is null)
@@ -194,6 +203,7 @@ public partial class LibraryViewModel : ViewModelBase
     private void UpdateFilteredBooks()
     {
         var query = SearchQuery.Trim();
+
         IEnumerable<Book> result = Books;
 
         if (!string.IsNullOrWhiteSpace(query))
@@ -210,6 +220,10 @@ public partial class LibraryViewModel : ViewModelBase
 
         result = SelectedSort switch
         {
+            BookSortOption.RecentlyAdded =>
+                result.OrderByDescending(
+                    book => book.AddedAt),
+
             BookSortOption.TitleAscending =>
                 result.OrderBy(
                     book => book.Title ?? string.Empty,
@@ -236,6 +250,13 @@ public partial class LibraryViewModel : ViewModelBase
                     book => book.Title ?? string.Empty,
                     StringComparer.CurrentCultureIgnoreCase),
 
+            BookSortOption.ProgressDescending =>
+                result.OrderByDescending(
+                    book => book.Progress)
+                .ThenBy(
+                    book => book.Title ?? string.Empty,
+                    StringComparer.CurrentCultureIgnoreCase),
+
             _ => result
         };
 
@@ -250,10 +271,9 @@ public partial class LibraryViewModel : ViewModelBase
     }
 
     /// <summary>
-    /// Обновляет состояния пустой библиотеки и пустого результата поиска,
-    /// используемые интерфейсом для отображения соответствующих состояний.
+    /// Обновляет состояния пустой библиотеки
+    /// и пустого результата поиска.
     /// </summary>
-    /// <param name="query">Нормализованный поисковый запрос.</param>
     private void UpdateEmptyState(string query)
     {
         IsEmpty = Books.Count == 0;
@@ -262,5 +282,60 @@ public partial class LibraryViewModel : ViewModelBase
             !IsEmpty &&
             !string.IsNullOrWhiteSpace(query) &&
             FilteredBooks.Count == 0;
+    }
+
+    /// <summary>
+    /// Преобразует значение сортировки из настроек
+    /// в соответствующий вариант сортировки библиотеки.
+    /// </summary>
+    private static BookSortOption GetSortOption(
+        string? sorting)
+    {
+        return sorting switch
+        {
+            "Title" =>
+                BookSortOption.TitleAscending,
+
+            "Author" =>
+                BookSortOption.AuthorAscending,
+
+            "Progress" =>
+                BookSortOption.ProgressDescending,
+
+            _ =>
+                BookSortOption.RecentlyAdded
+        };
+    }
+
+    /// <summary>
+    /// Сохраняет выбранную пользователем сортировку
+    /// как сортировку библиотеки по умолчанию.
+    /// </summary>
+    private void SaveDefaultSorting(BookSortOption sort)
+    {
+        var settings = _settingsService.Load();
+
+        settings.DefaultSorting = sort switch
+        {
+            BookSortOption.TitleAscending =>
+                "Title",
+
+            BookSortOption.TitleDescending =>
+                "Title",
+
+            BookSortOption.AuthorAscending =>
+                "Author",
+
+            BookSortOption.AuthorDescending =>
+                "Author",
+
+            BookSortOption.ProgressDescending =>
+                "Progress",
+
+            _ =>
+                "Recently Added"
+        };
+
+        _settingsService.Save(settings);
     }
 }

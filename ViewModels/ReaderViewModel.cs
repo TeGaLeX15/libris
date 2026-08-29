@@ -40,28 +40,24 @@ public partial class ReaderViewModel : ObservableObject
         _appDataService = appDataService;
         _appData = appData;
         _closeReader = closeReader;
-
         _readerService = new BookReaderService();
 
         var settings = _settingsService.Load();
 
-        ReadingWidth =
-            Math.Clamp(
-                settings.ReadingWidth,
-                400,
-                1400);
+        ReadingWidth = Math.Clamp(
+            settings.ReadingWidth,
+            400,
+            1400);
 
-        FontSize =
-            Math.Clamp(
-                settings.FontSize,
-                10,
-                48);
+        FontSize = Math.Clamp(
+            settings.FontSize,
+            10,
+            48);
 
-        LineHeight =
-            Math.Clamp(
-                settings.LineSpacing,
-                1.0,
-                3.0);
+        LineHeight = Math.Clamp(
+            settings.LineSpacing,
+            1.0,
+            3.0);
 
         FontFamily =
             string.IsNullOrWhiteSpace(settings.DefaultFont)
@@ -134,7 +130,10 @@ public partial class ReaderViewModel : ObservableObject
                 (CurrentChapter + ChapterProgress) /
                 _document.Chapters.Count;
 
-            return Math.Clamp(progress, 0.0, 1.0);
+            return Math.Clamp(
+                progress,
+                0.0,
+                1.0);
         }
     }
 
@@ -160,15 +159,13 @@ public partial class ReaderViewModel : ObservableObject
         {
             if (_document is null ||
                 CurrentChapter < 0 ||
-                CurrentChapter >=
-                _document.Chapters.Count)
+                CurrentChapter >= _document.Chapters.Count)
             {
                 return "Reading";
             }
 
-            return
-                _document.Chapters[
-                    CurrentChapter].Title;
+            return _document.Chapters[
+                CurrentChapter].Title;
         }
     }
 
@@ -192,7 +189,6 @@ public partial class ReaderViewModel : ObservableObject
                     _book.FilePath);
 
             RestorePosition();
-
             RebuildReaderHtml();
             NotifyChapterChanged();
         }
@@ -249,7 +245,10 @@ public partial class ReaderViewModel : ObservableObject
             return;
 
         ChapterProgress =
-            Math.Clamp(progress, 0.0, 1.0);
+            Math.Clamp(
+                progress,
+                0.0,
+                1.0);
 
         _book.Progress = Progress;
 
@@ -404,8 +403,7 @@ public partial class ReaderViewModel : ObservableObject
     {
         if (_document is null ||
             CurrentChapter < 0 ||
-            CurrentChapter >=
-            _document.Chapters.Count)
+            CurrentChapter >= _document.Chapters.Count)
         {
             return;
         }
@@ -459,7 +457,6 @@ public partial class ReaderViewModel : ObservableObject
             <html>
             <head>
                 <meta charset="utf-8">
-
                 <style>
                     html,
                     body {
@@ -468,18 +465,14 @@ public partial class ReaderViewModel : ObservableObject
 
                     body {
                         margin: 0;
-
                         display: flex;
                         align-items: center;
                         justify-content: center;
-
                         background: transparent;
                         color: #777;
-
                         font-family:
                             system-ui,
                             sans-serif;
-
                         text-align: center;
                     }
 
@@ -494,14 +487,12 @@ public partial class ReaderViewModel : ObservableObject
                     }
                 </style>
             </head>
-
             <body>
                 <div>
                     <h1>{{safeTitle}}</h1>
                     <p>{{safeMessage}}</p>
                 </div>
             </body>
-
             </html>
             """;
     }

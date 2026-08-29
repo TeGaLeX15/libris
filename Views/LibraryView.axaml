@@ -72,7 +72,23 @@
                         Width="145"
                         VerticalAlignment="Center"
                         ItemsSource="{Binding SortOptions}"
-                        SelectedItem="{Binding SelectedSort, Mode=TwoWay}" />
+                        SelectedItem="{Binding SelectedSort, Mode=TwoWay}">
+                        <ComboBox.ItemTemplate>
+                            <DataTemplate>
+                                <TextBlock>
+                                    <TextBlock.Styles>
+                                        <Style Selector="TextBlock">
+                                            <Setter Property="Text">
+                                                <Setter.Value>
+                                                    <Binding />
+                                                </Setter.Value>
+                                            </Setter>
+                                        </Style>
+                                    </TextBlock.Styles>
+                                </TextBlock>
+                            </DataTemplate>
+                        </ComboBox.ItemTemplate>
+                    </ComboBox>
 
                     <!--  Добавление книг в библиотеку  -->
                     <Button
